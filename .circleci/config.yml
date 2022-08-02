@@ -26,12 +26,10 @@ jobs:
           version: '8.0'
       - php/install-php:
           version: '8.1'  
-      - run:
-          name: "install composer"
-          command: "curl -sS https://getcomposer.org/installer | php"
+      - php/install-composer
       - run:
           name: "install dev"
-          command: "php composer.phar install --dev"
+          command: "php composer install --dev"
       
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
