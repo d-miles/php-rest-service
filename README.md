@@ -3,6 +3,7 @@
 PHP-REST-Service is a simple and fast PHP class for RESTful JSON APIs.
 
 ![Build Status](https://img.shields.io/circleci/build/github/cdgco/php-rest-service?style=flat-square)
+![PHP Version](https://img.shields.io/packagist/php-v/cdgco/php-rest-service?style=flat-square)
 
 ## Features
 
