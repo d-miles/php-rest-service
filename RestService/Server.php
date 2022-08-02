@@ -2,10 +2,12 @@
 
 namespace RestService;
 
-/**
- * \RestService\Server - A REST server class for RESTful APIs.
- */
 
+/**
+ * This client handles all API responses.
+ *
+ * It can handle JSON, XML or custom data types.
+ */
 class Client
 {
     /**
@@ -457,6 +459,9 @@ class InternalClient extends Client
 
 }
 
+/**
+ * A REST server class for RESTful APIs.
+ */
 class Server
 {
     /**
@@ -928,6 +933,9 @@ class Server
 
         $msg = array('error' => get_class($pException), 'message' => $message);
 
+        $code = '500';
+        if ($pException->getCode() != 0) $code = $pException->getCode();
+
         if ($this->debugMode) {
             $msg['file'] = $pException->getFile();
             $msg['line'] = $pException->getLine();
@@ -935,8 +943,7 @@ class Server
         }
 
         if (!$this->getClient()) throw new \Exception('Client not found in ServerController');
-        return $this->getClient()->sendResponse($msg, '500');
-
+        return $this->getClient()->sendResponse($msg, $code);
     }
 
     /**

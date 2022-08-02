@@ -33,7 +33,7 @@ PHP-REST-Service acts as a single page application, so all requests must be sent
 
 For example, on apache, you can add the following lines to your `.htaccess` file:
 
-```apache
+```apacheconf
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -44,25 +44,38 @@ RewriteRule (.+) index.php/$1 [L,QSA]
 
 ### Manual Endpoint Creation
 
+With manual endpoint creation, you must define a new route for each endpoint you want to expose.
+This is done by using the `addGetRoute()`, `addPostRoute()`, `addPutRoute()`, `addDeleteRoute()`, `addPatchRoute()`, `addHeadRoute()`, `addOptionsRoute()` and `addRoute()` methods. 
+
+All route methods accept a path and a callback (e.g. `addGetRoute('path', 'callbackFunction')`), while the `addRoute()` method also accepts the HTTP method (e.g. `addRoute('path', 'callbackFunction', 'get')`). If no method is specified, the default method is `_all_`.
+
+Each of the aforementioned methods will add a route for the specified HTTP method, with the exception of `addRoute()` which will add a route for all HTTP methods.
+
 ```php
 use RestService\Server;
 
 Server::create('/')
-    ->addGetRoute('test', function(){
-        return 'Yay!';
-    })
-    ->addGetRoute('foo/(.*)', function($bar){
-        return $bar;
-    })
-    ->addPostRoute('foo', function($field1, $field2) {
-      // do stuff with $field1, $field2 etc
-      // or you can directly get them with $_POST['field1']
-    })
+  ->addGetRoute('test', function(){
+    return 'Yay!';
+  })
+  ->addPostRoute('foo', function($field1) {
+    return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
+  })
+  >addGetRoute('use/this/name', function(){
+      return 'Hi there';
+  })
 ->run();
 
 ```
 
 ### Automatic Endpoint Creation
+
+With automatic endpoint creation, you can supply a PHP class that contains endpoint functions. The router will then scan the class for functions that start with `get`, `post`, `put`, `delete`, `patch`, `head` or `options` and add the corresponding route.
+
+Function names will be converted from camel case to dashes,  so `getFooBar()` will be converted to `/foo-bar`.
+
+You can also bind a function to a route other than the function name. Simply use the `@url` annotation to define the route.
+For example `@url /foo` will bind the function to the route `/foo`.
 
 ```php
 namespace MyRestApi;
@@ -70,101 +83,85 @@ namespace MyRestApi;
 use RestService\Server;
 
 class Admin {
-
-    /**
-    * Checks if a user is logged in.
-    *
-    * @return boolean
+  public function getTest(){
+    return 'Yay!';
+  }
+  public function postFoo($field1){
+    return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
+  }
+  /*
+    * @url /use/this/name
     */
-    public function getLoggedIn(){
-        return $this->getContainer('auth')->isLoggedIn();
-    }
-
-    /**
-    * @param string $username
-    * @param string $password
-    * return boolean
-    */
-    public function postLogin($username, $password){
-        return $this->getContainer('auth')->doLogin($username, $password);
-    }
-
-    /**
-     * @param string $server
-     * @url stats/([0-9]+)
-     * @url stats
-     * @return string
-     */
-    public function getStats($server = '1'){
-        return $this->getServerStats($server);
-    }
-
+  public function getNotThisName($field1){
+    return 'Hi there';
+  }
 }
 
-Server::create('/admin', 'myRestApi\Admin')
+Server::create('/', 'myRestApi\Admin')
     ->collectRoutes()
 ->run();
 ```
 
-Generates following entry points:
+Bot methods will generate the following endpoints:
 ```
-    + GET  /admin/logged-in
-    + POST /admin/login?username=&password=
-    + GET  /admin/stats/([0-9]+)
-    + GET  /admin/stats
++ GET  /test
++ POST /foo
++ GET  /use/this/name
 ```
-
 
 ## Responses
 
-The response body is always a array (JSON per default) containing a status code and the actual data.
-If a exception has been thrown, it contains the status 500, the exception class name as error and the message as message.
+The response body is always a JSON object containing a status code and the actual data.
+If a exception has been thrown, it contains the error code, the exception class name as error and the message as message.
 
 Some examples:
 
+```json
+{
+  "status": 200,
+  "data": true
+}
 ```
-+ GET admin/login?username=foo&password=bar
-  =>
-  {
-     "status": "200",
-     "data": true
-  }
-
-+ GET admin/login?username=foo&password=invalidPassword
-  =>
-  {
-     "status": "500",
-     "error": "InvalidLoginException",
-     "message": "Login is invalid or no access"
-  }
-
-+ GET admin/login
-  =>
-  {
-     "status: "400",
-     "error": "MissingRequiredArgumentException",
-     "message": "Argument 'username' is missing"
-  }
-
-+ GET admin/login?username=foo&password=invalidPassword
-  With active debugMode we'll get:
-  =>
-  {
-     "status": "500",
-     "error": "InvalidLoginException",
-     "message": "Login is invalid or no access",
-     "line": 10,
-     "file": "libs/RestAPI/Admin.class.php",
-     "trace": <debugTrace>
-  }
-
-+ GET admin/tools/cache
-  =>
-  {
-     "status": 200,
-     "data": true
-  }
+```json
+{
+  "status": 400,
+  "error": "MissingRequiredArgumentException",
+  "message": "Argument 'username' is missing"
+}
 ```
+```json
+{
+    "status": 500,
+    "error": "InvalidLoginException",
+    "message": "Login is invalid or no access"
+}
+```
+
+For verbose error messages, enable debug mode on the desired controller by using the `->setDebugMode(true)` method:
+
+```php
+Server::create('/', 'myRestApi\Admin')
+    ->setDebugMode(true)
+    ->collectRoutes()
+->run();
+```
+
+This will result in messages like:
+
+```json
+{
+    "status": 500,
+    "error": "InvalidLoginException",
+    "message": "Login is invalid or no access",
+    "line": 10,
+    "file": "libs/RestAPI/Admin.class.php",
+    "trace": <debugTrace>
+}
+```
+
+## PHPDoc
+
+For the full class-level documentation, please refer to the [PHPDoc](PHPDoc) documentation.
 
 ## License
 

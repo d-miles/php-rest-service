@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8a874d3446d0af25a958af20cb06a87c",
+    "content-hash": "3935ca87df5675811732966c78323ae1",
     "packages": [],
     "packages-dev": [
         {
@@ -191,6 +191,47 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v4.14.0"
             },
             "time": "2022-05-31T20:59:12+00:00"
+        },
+        {
+            "name": "onspli/phpdoc-markdown",
+            "version": "0.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/onspli/phpdoc-markdown.git",
+                "reference": "866150dbf3cea9a4be234467e40a6ba893cd5545"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/onspli/phpdoc-markdown/zipball/866150dbf3cea9a4be234467e40a6ba893cd5545",
+                "reference": "866150dbf3cea9a4be234467e40a6ba893cd5545",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ondřej Šplíchal",
+                    "email": "ondrej.splichal@gmail.com"
+                },
+                {
+                    "name": "Carl Vuorinen",
+                    "email": "carl.vuorinen@gmail.com"
+                }
+            ],
+            "description": "Generate documentation in Markdown format so it can be published in GitHub.",
+            "keywords": [
+                "documentation",
+                "markdown",
+                "phpDocumentor",
+                "phpdoc"
+            ],
+            "support": {
+                "source": "https://github.com/onspli/phpdoc-markdown/tree/0.3.3"
+            },
+            "time": "2021-08-15T19:04:40+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -2029,7 +2070,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3.0"
+        "php": ">=7.4.0"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"
