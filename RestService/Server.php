@@ -881,9 +881,12 @@ class Server
                 }
                 $arguments[] = $thisArgs;
             } else {
-                $method = $_SERVER['REQUEST_METHOD'];
-                if ('PUT' === $method) {
-                    parse_str(file_get_contents('php://input'), $_PUT);
+                $_PUT = null;
+                if (isset($_SERVER['REQUEST_METHOD'])) {
+                    $method = $_SERVER['REQUEST_METHOD'];
+                    if ('PUT' === $method) {
+                        parse_str(file_get_contents('php://input'), $_PUT);
+                    }
                 }
 
                 if (!$param->isOptional() && !isset($_GET[$name]) && !isset($_POST[$name]) && !isset($_PUT[$name])) {

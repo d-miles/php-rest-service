@@ -15,9 +15,9 @@ class BasicTest extends \PHPUnit\Framework\TestCase
 
         $response = $restService->simulateCall('/test/test', 'get');
         $this->assertEquals('{
-    "status": 200,
-    "data": "test"
-}', $response);
+            "status": 200,
+            "data": "test"
+        }', $response);
 
     }
 }
