@@ -37,7 +37,7 @@ class Server
     /**
      * Contains the controller object.
      *
-     * @var string
+     * @var string|object
      */
     protected $controller = '';
 
@@ -128,6 +128,22 @@ class Server
      * @var callable
      */
     protected $controllerFactory;
+
+    /**
+     * @var callable
+     */
+    private function declaresArray(\ReflectionParameter $reflectionParameter): bool
+    {
+        $reflectionType = $reflectionParameter->getType();
+    
+        if (!$reflectionType) return false;
+    
+        $types = $reflectionType instanceof \ReflectionUnionType
+            ? $reflectionType->getTypes()
+            : [$reflectionType];
+    
+       return in_array('array', array_map(fn(\ReflectionNamedType $t) => $t->getName(), $types));
+    }
 
     /**
      * Constructor
@@ -427,7 +443,7 @@ class Server
         if (is_object($pMessage) && $pMessage->xdebug_message) $pMessage = $pMessage->xdebug_message;
         $msg = array('error' => $pCode, 'message' => $pMessage);
         if (!$this->getClient()) throw new \Exception('client_not_found_in_ServerController');
-        return $this->getClient()->sendResponse('400', $msg);
+        return $this->getClient()->sendResponse($msg, '400');
     }
 
     /**
@@ -442,7 +458,7 @@ class Server
         if (is_object($pMessage) && $pMessage->xdebug_message) $pMessage = $pMessage->xdebug_message;
         $msg = array('error' => $pCode, 'message' => $pMessage);
         if (!$this->getClient()) throw new \Exception('client_not_found_in_ServerController');
-        return $this->getClient()->sendResponse('500', $msg);
+        return $this->getClient()->sendResponse($msg, '500');
     }
 
     /**
@@ -468,7 +484,7 @@ class Server
         }
 
         if (!$this->getClient()) throw new \Exception('Client not found in ServerController');
-        return $this->getClient()->sendResponse('500', $msg);
+        return $this->getClient()->sendResponse($msg, '500');
 
     }
 
@@ -673,8 +689,10 @@ class Server
     public function normalizeUrl(&$pUrl)
     {
         if ('/' === $pUrl) return;
-        if (substr($pUrl, -1) == '/') $pUrl = substr($pUrl, 0, -1);
-        if (substr($pUrl, 0, 1) != '/') $pUrl = '/' . $pUrl;
+        if ($pUrl != null) {
+            if (substr($pUrl, -1) == '/') $pUrl = substr($pUrl, 0, -1);
+            if (substr($pUrl, 0, 1) != '/') $pUrl = '/' . $pUrl;
+        }
     }
 
     /**
@@ -684,7 +702,7 @@ class Server
      */
     public function send($pData)
     {
-        return $this->getClient()->sendResponse(200, array('data' => $pData));
+        return $this->getClient()->sendResponse(array('data' => $pData), 200);
     }
 
     /**
@@ -777,10 +795,19 @@ class Server
         $requestedUrl = $this->getClient()->getUrl();
         $this->normalizeUrl($requestedUrl);
         //check if its in our area
-        if (strpos($requestedUrl, $this->triggerUrl) !== 0) return;
+
+        if ($requestedUrl != null) {
+            if (strpos($requestedUrl, $this->triggerUrl) !== 0) return;
+        }
 
         $endPos = $this->triggerUrl === '/' ? 1 : strlen($this->triggerUrl) + 1;
-        $uri = substr($requestedUrl, $endPos);
+
+        if ($requestedUrl != null) {
+            $uri = substr($requestedUrl, $endPos);
+        }
+        else {
+            $uri = '';
+        }
 
         if (!$uri) $uri = '';
 
@@ -854,12 +881,16 @@ class Server
                 }
                 $arguments[] = $thisArgs;
             } else {
+                $method = $_SERVER['REQUEST_METHOD'];
+                if ('PUT' === $method) {
+                    parse_str(file_get_contents('php://input'), $_PUT);
+                }
 
-                if (!$param->isOptional() && !isset($_GET[$name]) && !isset($_POST[$name])) {
+                if (!$param->isOptional() && !isset($_GET[$name]) && !isset($_POST[$name]) && !isset($_PUT[$name])) {
                     return $this->sendBadRequest('MissingRequiredArgumentException', sprintf("Argument '%s' is missing.", $name));
                 }
 
-                $arguments[] = isset($_GET[$name]) ? $_GET[$name] : (isset($_POST[$name]) ? $_POST[$name] : $param->getDefaultValue());
+                $arguments[] = isset($_GET[$name]) ? ($_GET[$name]) : (isset($_POST[$name]) ? $_POST[$name] : (isset($_PUT[$name]) ? $_PUT[$name] : $param->getDefaultValue()));
             }
         }
 
@@ -1035,7 +1066,7 @@ class Server
             if ($fillPhpDocParam) {
                 $phpDoc['param'][] = array(
                     'name' => $param->getName(),
-                    'type' => $param->isArray()?'array':'mixed'
+                    'type' => $this->declaresArray($param)?'array':'mixed'
                 );
             }
         }
@@ -1048,8 +1079,8 @@ class Server
 
             $c = 0;
             foreach ($phpDoc['param'] as $phpDocParam) {
-
-                $param = $params[$phpDocParam['name']];
+                if (isset($params[$phpDocParam['name']]))
+                    $param = $params[$phpDocParam['name']];
                 if (!$param) continue;
                 $parameter = array(
                     'type' => $phpDocParam['type']
