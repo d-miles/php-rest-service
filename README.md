@@ -3,8 +3,6 @@ php-rest-service
 
 Php-Rest-Service is a simple and fast PHP class for RESTful JSON APIs.
 
-[![Build Status](https://travis-ci.org/marcj/php-rest-service.png)](https://travis-ci.org/marcj/php-rest-service)
-
 Features
 --------
 
@@ -21,7 +19,7 @@ Features
 Installation
 ------------
 
- - https://packagist.org/packages/marcj/php-rest-service.
+ - https://packagist.org/packages/cdgco/php-rest-service.
  - More information available under https://packagist.org/.
 
 Create a `composer.json`:
@@ -29,7 +27,7 @@ Create a `composer.json`:
 ```json
 {
     "require": {
-        "marcj/php-rest-service": "*"
+        "cdgco/php-rest-service": "*"
     }
 }
 ```
@@ -302,8 +300,3 @@ License
 -------
 
 Licensed under the MIT License. See the LICENSE file for more details.
-
-Take a look into the code, to get more information about the possibilities. It's well documented.
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/marcj/php-rest-service/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
