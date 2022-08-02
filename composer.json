@@ -1,13 +1,13 @@
 {
-    "name": "marcj/php-rest-service",
+    "name": "cdgco/php-rest-service",
     "description": "PHPRestService is a simple and fast PHP class for server side RESTful APIs.",
     "keywords": ["REST", "RESTful", "php", "API"],
     "license": "MIT",
     "authors": [
         {
-            "name": "Marc J. Schmidt",
-            "email": "marc@kryn.org",
-            "homepage": "http://marcjschmidt.de"
+            "name": "Carter Roeser",
+            "email": "carter@cdgtech.one",
+            "homepage": "https://cdgtech.one"
         }
     ],
     "require": {
