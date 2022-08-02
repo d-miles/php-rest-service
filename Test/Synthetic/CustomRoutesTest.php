@@ -17,33 +17,33 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
         $response = $restService->simulateCall('/login?', 'post');
 
         $this->assertEquals('{
-            "status": 400,
-            "error": "MissingRequiredArgumentException",
-            "message": "Argument \'username\' is missing."
-        }', $response);
+    "status": 400,
+    "error": "MissingRequiredArgumentException",
+    "message": "Argument \'username\' is missing."
+}', $response);
 
         $response = $restService->simulateCall('/login?username=bla', 'post');
 
         $this->assertEquals('{
-            "status": 400,
-            "error": "MissingRequiredArgumentException",
-            "message": "Argument \'password\' is missing."
-        }', $response);
+    "status": 400,
+    "error": "MissingRequiredArgumentException",
+    "message": "Argument \'password\' is missing."
+}', $response);
 
         $response = $restService->simulateCall('/login?username=peter&password=pwd', 'post');
 
         $this->assertEquals('{
-            "status": 200,
-            "data": true
-        }', $response);
+    "status": 200,
+    "data": true
+}', $response);
 
         $response = $restService->simulateCall('/login?username=peter&password=pwd', 'get');
 
         $this->assertEquals('{
-            "status": 400,
-            "error": "RouteNotFoundException",
-            "message": "There is no route for \'login\'."
-        }', $response);
+    "status": 400,
+    "error": "RouteNotFoundException",
+    "message": "There is no route for \'login\'."
+}', $response);
 
     }
 
@@ -56,9 +56,9 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
         $response = $restService->simulateCall('/v1/login?username=peter&password=pwd', 'post');
 
         $this->assertEquals('{
-            "status": 200,
-            "data": true
-        }', $response);
+    "status": 200,
+    "data": true
+}', $response);
 
         $restService = Server::create('/v1/', new MyRoutes)
             ->setClient('RestService\\InternalClient')
@@ -67,9 +67,9 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
         $response = $restService->simulateCall('/v1/login?username=peter&password=pwd', 'post');
 
         $this->assertEquals('{
-            "status": 200,
-            "data": true
-        }', $response);
+    "status": 200,
+    "data": true
+}', $response);
 
         $restService = Server::create('v1', new MyRoutes)
             ->setClient('RestService\\InternalClient')
@@ -78,9 +78,9 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
         $response = $restService->simulateCall('/v1/login?username=peter&password=pwd', 'post');
 
         $this->assertEquals('{
-            "status": 200,
-            "data": true
-        }', $response);
+    "status": 200,
+    "data": true
+}', $response);
 
     }
 
@@ -97,9 +97,9 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
         $response = $restService->simulateCall('/v1/sub/login?username=peter&password=pwd', 'post');
 
         $this->assertEquals('{
-            "status": 200,
-            "data": true
-        }', $response);
+    "status": 200,
+    "data": true
+}', $response);
 
     }
 
@@ -115,9 +115,9 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
         $response = $restService->simulateCall('/sub/login?username=peter&password=pwd', 'post');
 
         $this->assertEquals('{
-            "status": 200,
-            "data": true
-        }', $response);
+    "status": 200,
+    "data": true
+}', $response);
 
     }
 }

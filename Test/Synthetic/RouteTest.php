@@ -40,14 +40,14 @@ class RouteTest extends \PHPUnit\Framework\TestCase
         foreach ($restService->getClient()->methods as $method) {
 
             $this->assertEquals('{
-                "status": 200,
-                "data": "'.$method.'Test"
-            }', $restService->simulateCall('/test', $method));
+    "status": 200,
+    "data": "'.$method.'Test"
+}', $restService->simulateCall('/test', $method));
 
             $this->assertEquals('{
-                "status": 200,
-                "data": "allTest"
-            }', $restService->simulateCall('/all-test', $method));
+    "status": 200,
+    "data": "allTest"
+}', $restService->simulateCall('/all-test', $method));
 
         }
 
