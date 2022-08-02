@@ -12,8 +12,6 @@ workflows:
   test-php-workflow:
     jobs:
       - php/test:
-          version: '7.3'
-      - php/test:
           version: '7.4'
       - php/test:
           version: '8.0'
