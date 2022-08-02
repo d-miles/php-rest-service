@@ -1,12 +1,10 @@
-php-rest-service
-==============
+# PHP-REST-Service
 
-Php-Rest-Service is a simple and fast PHP class for RESTful JSON APIs.
+PHP-REST-Service is a simple and fast PHP class for RESTful JSON APIs.
 
 ![Build Status](https://img.shields.io/circleci/build/github/cdgco/php-rest-service?style=flat-square)
 
-Features
---------
+## Features
 
 + Easy to use syntax
 + Regular Expression support
@@ -18,67 +16,30 @@ Features
 + Supports ?_method=`httpMethod` as addition to the actual HTTP method.
 + With auto-generation through PHP's `reflection`
 
-Installation
-------------
 
- - https://packagist.org/packages/cdgco/php-rest-service.
- - More information available under https://packagist.org/.
+## Requirements
+* PHP 7.4+
+## Installation
 
-Create a `composer.json`:
+### Composer
 
-```json
-{
-    "require": {
-        "cdgco/php-rest-service": "*"
-    }
-}
+Run `php composer require cdgco/php-rest-service`, then include the Composer autoloader with `include 'vendor/autoload.php';`.
+
+### Manual
+
+Copy `Server.php` to your directory and include with `include 'Server.php';`.
+
+## Web Server Configuration
+
+PHP-REST-Service acts as a single page application, so all requests must be sent to the index.php file (or the file you want to serve).
+
+For example, on apache, you can add the following lines to your `.htaccess` file:
+
 ```
-
-and run
-
-```bash
-$ wget http://getcomposer.org/composer.phar
-$ php composer.phar install
-```
-
-After the installation, you need to include the `vendor/autoload.php` to make the class in your script available.
-```php
-include 'vendor/autoload.php';
-```
-
-Requirements
-============
-
- - PHP 7.4 and above.
- - PHPUnit to execute the test suite.
- - Setup PATH_INFO in mod_rewrite (.htaccess) or other webserver configuration
-   
-Example config:
-apache webserver
-----------------
-```
-#.htaccess
 RewriteEngine On
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule (.+) index.php/$1 [L,QSA]
-```
-nginx webserver
----------------
-```
-// edit virtualhost /etc/nginx/conf.d/name_virtualhost_file
-server {
- .. something params ...
- location / {
-  include fastcgi_params;
-     
-  fastcgi_pass unix:/var/run/php5-fpm.sock;
-  fastcgi_param SCRIPT_FILENAME $document_root/index.php;
- }
-}
-
-// and add line to /etc/nginx/fastcgi_params
-fastcgi_param PATH_INFO $fastcgi_script_name;
 ```
 
 Usage Demo
