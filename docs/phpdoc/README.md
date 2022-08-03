@@ -4,26 +4,25 @@
 
 | Method | Description |
 |--------|-------------|
-| [**Client**](#Client) | This client handles all API responses. |
-| [Client::__construct](#Client__construct) |  |
-| [Client::setController](#ClientsetController) |  |
-| [Client::getController](#ClientgetController) |  |
+| [**Client**](#Client) | This client handles API responses for a given endpoint. |
+| [Client::__construct](#Client__construct) | Create a new client. |
+| [Client::setController](#ClientsetController) | Attach client to different controller. |
+| [Client::getController](#ClientgetController) | Return the currently attached controller. |
 | [Client::sendResponse](#ClientsendResponse) | Sends the actual response. |
-| [Client::getOutputFormatMethod](#ClientgetOutputFormatMethod) |  |
-| [Client::getOutputFormat](#ClientgetOutputFormat) |  |
+| [Client::getOutputFormatMethod](#ClientgetOutputFormatMethod) | Returns the current output format method |
+| [Client::getOutputFormat](#ClientgetOutputFormat) | Returns the current output format |
 | [Client::getMethod](#ClientgetMethod) | Detect the method. |
-| [Client::setMethod](#ClientsetMethod) | Sets a custom http method. It does then not check againstSERVER[&#039;REQUEST_METHOD&#039;], $_GET[&#039;_method&#039;] etc anymore. |
-| [Client::setContentLength](#ClientsetContentLength) | Set header Content-Length $pMessage. |
-| [Client::asJSON](#ClientasJSON) | Converts $pMessage to pretty json. |
-| [Client::jsonFormat](#ClientjsonFormat) | Indents a flat JSON string to make it more human-readable. |
-| [Client::asXML](#ClientasXML) | Converts $pMessage to xml. |
-| [Client::toXml](#ClienttoXml) |  |
+| [Client::setMethod](#ClientsetMethod) | Sets a custom http method. |
+| [Client::setContentLength](#ClientsetContentLength) | Set header Content-Length from data. |
+| [Client::asJSON](#ClientasJSON) | Converts data to pretty json. |
+| [Client::asXML](#ClientasXML) | Converts data to xml. |
+| [Client::asText](#ClientasText) | Converts data to pretty json. |
 | [Client::addOutputFormat](#ClientaddOutputFormat) | Add a additional output format. |
 | [Client::setFormat](#ClientsetFormat) | Set the current output format. |
-| [Client::getUrl](#ClientgetUrl) | Returns the url. |
-| [Client::setUrl](#ClientsetUrl) | Set the url. |
+| [Client::getURL](#ClientgetURL) | Returns the current endpoint url. |
+| [Client::setURL](#ClientsetURL) | Set the current endpoint url. |
 | [Client::setupFormats](#ClientsetupFormats) | Setup formats. |
-| [**InternalClient**](#InternalClient) | This client does not send any HTTP data,instead it just returns the value. |
+| [**InternalClient**](#InternalClient) | This client does not send any HTTP data, instead it just returns the value. |
 | [InternalClient::sendResponse](#InternalClientsendResponse) | Sends the actual response. |
 | [**Server**](#Server) | A REST server class for RESTful APIs. |
 | [Server::__construct](#Server__construct) | Constructor |
@@ -77,19 +76,19 @@
 
 ## Client
 
-This client handles all API responses.
+This client handles API responses for a given endpoint.
 
-It can handle JSON, XML or custom data types.
+It can format the response as JSON, XML, or plain text.
 
 * Full name: \RestService\Client
 
 
 ### Client::__construct
 
-
+Create a new client.
 
 ```php
-Client::__construct( \RestService\Server pServerController ): mixed
+Client::__construct( \RestService\Server pServerController ): void
 ```
 
 
@@ -99,7 +98,7 @@ Client::__construct( \RestService\Server pServerController ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pServerController` | **\RestService\Server** |  |
+| `pServerController` | **\RestService\Server** | The server controller. |
 
 
 **Return Value:**
@@ -111,10 +110,10 @@ Client::__construct( \RestService\Server pServerController ): mixed
 ---
 ### Client::setController
 
-
+Attach client to different controller.
 
 ```php
-Client::setController( \RestService\Server controller ): mixed
+Client::setController( \RestService\Server pServerController ): void
 ```
 
 
@@ -124,7 +123,7 @@ Client::setController( \RestService\Server controller ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `controller` | **\RestService\Server** |  |
+| `pServerController` | **\RestService\Server** | Server controller. |
 
 
 **Return Value:**
@@ -136,7 +135,7 @@ Client::setController( \RestService\Server controller ): mixed
 ---
 ### Client::getController
 
-
+Return the currently attached controller.
 
 ```php
 Client::getController(  ): \RestService\Server
@@ -148,7 +147,7 @@ Client::getController(  ): \RestService\Server
 
 **Return Value:**
 
-
+$pServerController Server controller.
 
 
 
@@ -158,7 +157,7 @@ Client::getController(  ): \RestService\Server
 Sends the actual response.
 
 ```php
-Client::sendResponse( pMessage, string pHttpCode = '200' ): mixed
+Client::sendResponse( pMessage, string pHttpCode = '200' ): void
 ```
 
 
@@ -168,8 +167,8 @@ Client::sendResponse( pMessage, string pHttpCode = '200' ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMessage` | **** |  |
-| `pHttpCode` | **string** |  |
+| `pMessage` | **** | The data to return. |
+| `pHttpCode` | **string** | The HTTP code to return. |
 
 
 **Return Value:**
@@ -181,7 +180,7 @@ Client::sendResponse( pMessage, string pHttpCode = '200' ): mixed
 ---
 ### Client::getOutputFormatMethod
 
-
+Returns the current output format method
 
 ```php
 Client::getOutputFormatMethod( string pFormat ): string
@@ -194,19 +193,19 @@ Client::getOutputFormatMethod( string pFormat ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pFormat` | **string** |  |
+| `pFormat` | **string** | The output format. &#039;json&#039;, &#039;xml&#039;, &#039;text&#039; |
 
 
 **Return Value:**
 
-
+'asJSON', 'asXML', or 'asText'
 
 
 
 ---
 ### Client::getOutputFormat
 
-
+Returns the current output format
 
 ```php
 Client::getOutputFormat(  ): string
@@ -218,7 +217,7 @@ Client::getOutputFormat(  ): string
 
 **Return Value:**
 
-
+'json', 'xml', 'text'
 
 
 
@@ -237,15 +236,14 @@ Client::getMethod(  ): string
 
 **Return Value:**
 
-
+'get', 'post', 'put', 'delete', 'head', 'options', 'patch'
 
 
 
 ---
 ### Client::setMethod
 
-Sets a custom http method. It does then not check against
-SERVER['REQUEST_METHOD'], $_GET['_method'] etc anymore.
+Sets a custom http method.
 
 ```php
 Client::setMethod( string pMethod ): \RestService\Client
@@ -258,22 +256,22 @@ Client::setMethod( string pMethod ): \RestService\Client
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMethod` | **string** |  |
+| `pMethod` | **string** | &#039;get&#039;, &#039;post&#039;, &#039;put&#039;, &#039;delete&#039;, &#039;head&#039;, &#039;options&#039;, &#039;patch&#039; |
 
 
 **Return Value:**
 
-
+$this Client instance.
 
 
 
 ---
 ### Client::setContentLength
 
-Set header Content-Length $pMessage.
+Set header Content-Length from data.
 
 ```php
-Client::setContentLength( pMessage ): mixed
+Client::setContentLength( mixed pMessage ): void
 ```
 
 
@@ -283,7 +281,7 @@ Client::setContentLength( pMessage ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMessage` | **** |  |
+| `pMessage` | **mixed** | The data to set the header from. |
 
 
 **Return Value:**
@@ -295,10 +293,10 @@ Client::setContentLength( pMessage ): mixed
 ---
 ### Client::asJSON
 
-Converts $pMessage to pretty json.
+Converts data to pretty json.
 
 ```php
-Client::asJSON( pMessage ): string
+Client::asJSON( mixed pMessage ): string
 ```
 
 
@@ -308,47 +306,22 @@ Client::asJSON( pMessage ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMessage` | **** |  |
+| `pMessage` | **mixed** | The data to convert. |
 
 
 **Return Value:**
 
-
-
-
-
----
-### Client::jsonFormat
-
-Indents a flat JSON string to make it more human-readable.
-
-```php
-Client::jsonFormat( string json ): string
-```
-
-Original at http://recursive-design.com/blog/2008/03/11/format-json-with-php/
-
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `json` | **string** | The original JSON string to process. |
-
-
-**Return Value:**
-
-Indented version of the original JSON string.
+JSON version of the original data.
 
 
 
 ---
 ### Client::asXML
 
-Converts $pMessage to xml.
+Converts data to xml.
 
 ```php
-Client::asXML( pMessage ): string
+Client::asXML( mixed pMessage, string pParentTagName = '', int pDepth = 1, bool pHeader = true ): string
 ```
 
 
@@ -358,22 +331,25 @@ Client::asXML( pMessage ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMessage` | **** |  |
+| `pMessage` | **mixed** | The data to convert. |
+| `pParentTagName` | **string** | The name of the parent tag. Default is &#039;&#039;. |
+| `pDepth` | **int** | The depth of the current tag. Default is 1. |
+| `pHeader` | **bool** | Whether to wrap the xml in a header. Default is true. |
 
 
 **Return Value:**
 
-
+XML version of the original data.
 
 
 
 ---
-### Client::toXml
+### Client::asText
 
-
+Converts data to pretty json.
 
 ```php
-Client::toXml( mixed pData, string pParentTagName = '', int pDepth = 1 ): string
+Client::asText( mixed pMessage ): string
 ```
 
 
@@ -383,14 +359,12 @@ Client::toXml( mixed pData, string pParentTagName = '', int pDepth = 1 ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pData` | **mixed** |  |
-| `pParentTagName` | **string** |  |
-| `pDepth` | **int** |  |
+| `pMessage` | **mixed** | The data to convert. |
 
 
 **Return Value:**
 
-XML
+JSON version of the original data.
 
 
 
@@ -410,13 +384,13 @@ Client::addOutputFormat( string pCode, string pMethod ): \RestService\Client
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pCode` | **string** |  |
-| `pMethod` | **string** |  |
+| `pCode` | **string** | Name of the format. |
+| `pMethod` | **string** | Method to use to output the format. |
 
 
 **Return Value:**
 
-$this
+$this Client instance.
 
 
 
@@ -436,22 +410,22 @@ Client::setFormat( string pFormat ): \RestService\Client
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pFormat` | **string** | a key of $outputForms |
+| `pFormat` | **string** | Name of the format. |
 
 
 **Return Value:**
 
-
+$this Client instance.
 
 
 
 ---
-### Client::getUrl
+### Client::getURL
 
-Returns the url.
+Returns the current endpoint url.
 
 ```php
-Client::getUrl(  ): string
+Client::getURL(  ): string
 ```
 
 
@@ -460,17 +434,17 @@ Client::getUrl(  ): string
 
 **Return Value:**
 
-
+The current endpoint url.
 
 
 
 ---
-### Client::setUrl
+### Client::setURL
 
-Set the url.
+Set the current endpoint url.
 
 ```php
-Client::setUrl( string pUrl ): \RestService\Client
+Client::setURL( string pUrl ): \RestService\Client
 ```
 
 
@@ -480,12 +454,12 @@ Client::setUrl( string pUrl ): \RestService\Client
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUrl` | **string** |  |
+| `pUrl` | **string** | The new endpoint url. |
 
 
 **Return Value:**
 
-$this
+$this Client instance.
 
 
 
@@ -504,15 +478,14 @@ Client::setupFormats(  ): \RestService\Client
 
 **Return Value:**
 
-
+$this Client instance.
 
 
 
 ---
 ## InternalClient
 
-This client does not send any HTTP data,
-instead it just returns the value.
+This client does not send any HTTP data, instead it just returns the value.
 
 Good for testing purposes.
 
@@ -525,7 +498,7 @@ Good for testing purposes.
 Sends the actual response.
 
 ```php
-InternalClient::sendResponse( mixed pMessage, mixed pHttpCode = '200' ): mixed
+InternalClient::sendResponse( mixed pMessage, string pHttpCode = '200' ): string
 ```
 
 
@@ -535,13 +508,13 @@ InternalClient::sendResponse( mixed pMessage, mixed pHttpCode = '200' ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMessage` | **mixed** |  |
-| `pHttpCode` | **mixed** |  |
+| `pMessage` | **mixed** | The data to process. |
+| `pHttpCode` | **string** | The HTTP code to process. |
 
 
 **Return Value:**
 
-
+HTTP method of current request.
 
 
 

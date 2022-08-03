@@ -23,6 +23,9 @@
     "scripts": {
         "test": [
             "./vendor/bin/phpunit"
+        ],
+        "phpdoc": [
+            "php phpDocumentor.phar --template=vendor/onspli/phpdoc-markdown/templates/public-onefile/"
         ]
     }
 }
