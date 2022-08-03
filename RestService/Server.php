@@ -519,6 +519,13 @@ class Server
     protected $client;
 
     /**
+     * OpenAPI Specification.
+     *
+     * @var array
+     */
+    protected $apiSpec;
+
+    /**
      * List of excluded methods.
      *
      * @var array|string array('methodOne', 'methodTwo') or * for all methods
@@ -618,6 +625,9 @@ class Server
             if ($pParentController->getCheckAccess())
                 $this->setCheckAccess($pParentController->getCheckAccess());
 
+            if ($pParentController->getApiSpec())
+                $this->setApiSpec($pParentController->getApiSpec()[0], $pParentController->getApiSpec()[1]);
+
             if ($pParentController->getExceptionHandler())
                 $this->setExceptionHandler($pParentController->getExceptionHandler());
 
@@ -674,6 +684,31 @@ class Server
      */
     public function getControllerFactory() {
         return $this->controllerFactory;
+    }
+
+    /**
+     * Change the current controller factory.
+     * 
+     * @param string $title The name of the controller.
+     * @param string $version The version of the controller.
+     * @return Server $this The server instance.
+     */
+    public function setApiSpec($title, $version) {
+        $this->apiSpec = [
+            'title' => $title,
+            'version' => $version
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Return the current controller factory.
+     * 
+     * @return array $apiSpec The API specification.
+     */
+    public function getApiSpec() {
+        return $this->apiSpec;
     }
 
     /**
@@ -1249,6 +1284,62 @@ class Server
         if ((!$callableMethod || $method != 'options') && $requiredMethod == 'options') {
             $description = $this->describe($uri);
             $this->send($description);
+        }
+
+        if (!$callableMethod || $uri == 'spec' && $requiredMethod == 'get' && $this->getApiSpec() != null) {
+            header('HTTP/1.0 200 OK');
+            header('Content-Type: application/json; charset=utf-8');
+            $spec['openapi'] = '3.0.0';
+            $spec['info'] = $this->getApiSpec();
+
+            $pUri = null;
+            $routes = array("/spec" => array("get" => array("summary" => "Get the API Specification", "responses" => array("200" => array("description" => "Successful operation")))));
+
+            foreach ($this->routes as $routeUri => $routeMethods) {
+
+                $matches = array();
+                if (!$pUri || ($pUri && preg_match('|^'.$routeUri.'$|', $pUri, $matches))) {
+    
+                    if ($matches) {
+                        array_shift($matches);
+                    }
+                    $path = '/'.$routeUri;
+                    $def = array();
+                    
+    
+                    foreach ($routeMethods as $method => $phpMethod) {
+    
+                        if (is_string($phpMethod)) {
+                            $ref = new \ReflectionClass($this->controller);
+                            $refMethod = $ref->getMethod($phpMethod);
+                        } else {
+                            $refMethod = new \ReflectionFunction($phpMethod);
+                        }
+                        $metadata = $this->getMethodMetaData($refMethod);
+                        $def[$method] = array(
+                            "parameters" => $metadata['parameters'],
+                            "responses" => array(
+                                "success" => $metadata['return']['type'],
+                                )
+                        );
+                    }
+                    $routes[$path] = $def;
+                }
+            }
+    
+            // if (!$pUri) {
+            //     foreach ($this->controllers as $controller) {
+            //         $definition['subController'][$controller->getTriggerUrl()] = $controller->describe(false, true);
+            //     }
+            // }
+            $spec['paths'] = $routes;
+            $spec['components'] = array("schemas" => array(
+                "200" => array("type" => "object", "properties" => array("status" => array("type" => "integer"), "data" => array("type" => "object"))),
+                "500" => array("type" => "object", "properties" => array("status" => array("type" => "integer"), "error" => array("type" => "string"), "data" => array("type" => "object")))
+            ));
+
+            echo json_encode($spec);
+            exit;
         }
 
         if (!$callableMethod) {

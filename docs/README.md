@@ -96,8 +96,8 @@ class Admin {
     return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
   }
   /*
-    * @url /use/this/name
-    */
+   * @url /use/this/name
+   */
   public function getNotThisName($field1){
     return 'Hi there';
   }
@@ -289,6 +289,7 @@ which will result in
 ```
 
 or 
+
 ```php
 throw new \Exception('Another error', 123);
 ```
