@@ -8,6 +8,8 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 ![PHP Version](https://img.shields.io/packagist/php-v/cdgco/php-rest-service?style=flat-square)
 ![Package Version](https://img.shields.io/packagist/v/cdgco/php-rest-service?style=flat-square)
 ![License](https://img.shields.io/github/license/cdgco/php-rest-service?style=flat-square)
+
+[https://cdgco.github.io/php-rest-service](https://cdgco.github.io/php-rest-service)
 </div>
 
 ## Features
@@ -26,15 +28,7 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 ## Requirements
 * PHP 7.4+
 ## Installation
-
-### Composer
-
-Run `php composer require cdgco/php-rest-service`, then include the Composer autoloader with `include 'vendor/autoload.php';`.
-
-### Manual
-
-Copy `Server.php` to your directory and include with `include 'Server.php';`.
-
+`php composer require cdgco/php-rest-service`
 
 ## Demo
 
@@ -93,6 +87,10 @@ Both methods will generate the following endpoints:
 + POST /foo
 + GET  /use/this/name
 ```
+
+# Documentation
+
+Read the full documentation at [https://cdgco.github.io/php-rest-service](https://cdgco.github.io/php-rest-service).
 
 ## License
 

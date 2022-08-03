@@ -108,7 +108,7 @@ Server::create('/', 'myRestApi\Admin')
 ->run();
 ```
 
-Bot methods will generate the following endpoints:
+Both methods will generate the following endpoints:
 ```
 + GET  /test
 + POST /foo
@@ -138,7 +138,7 @@ public function getFoo(){
 }
 ```
 
-Note that the API server wraps the path / url argument in `^` and `$` to match the entire path, with the delimiter `|`.
+!> Note that the API server wraps the path / url argument in `^` and `$` to match the entire path, with the delimiter `|`.
 
 ### URL Parameters
 
