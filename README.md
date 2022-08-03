@@ -83,7 +83,7 @@ Server::create('/', 'myRestApi\Admin')
 
 Both methods will generate the following endpoints:
 ```
-+ GET  /test
++ GET  /test/:param
 + POST /foo
 + GET  /use/this/name
 ```
