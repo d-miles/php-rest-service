@@ -13,34 +13,34 @@
 | [Client::getOutputFormat](#ClientgetOutputFormat) | Returns the current output format |
 | [Client::getMethod](#ClientgetMethod) | Detect the method. |
 | [Client::setMethod](#ClientsetMethod) | Sets a custom http method. |
-| [Client::setContentLength](#ClientsetContentLength) | Set header Content-Length from data. |
-| [Client::asJSON](#ClientasJSON) | Converts data to pretty json. |
-| [Client::asXML](#ClientasXML) | Converts data to xml. |
-| [Client::asText](#ClientasText) | Converts data to pretty json. |
+| [Client::setContentLength](#ClientsetContentLength) | Set header &quot;Content-Length&quot; from data. |
+| [Client::asJSON](#ClientasJSON) | Converts data to pretty JSON. |
+| [Client::asXML](#ClientasXML) | Converts data to XML. |
+| [Client::asText](#ClientasText) | Converts data to text. |
 | [Client::addOutputFormat](#ClientaddOutputFormat) | Add a additional output format. |
 | [Client::setFormat](#ClientsetFormat) | Set the current output format. |
-| [Client::getURL](#ClientgetURL) | Returns the current endpoint url. |
-| [Client::setURL](#ClientsetURL) | Set the current endpoint url. |
+| [Client::getURL](#ClientgetURL) | Returns the current endpoint URL. |
+| [Client::setURL](#ClientsetURL) | Set the current endpoint URL. |
 | [Client::setupFormats](#ClientsetupFormats) | Setup formats. |
 | [**InternalClient**](#InternalClient) | This client does not send any HTTP data, instead it just returns the value. |
 | [InternalClient::sendResponse](#InternalClientsendResponse) | Sends the actual response. |
 | [**Server**](#Server) | A REST server class for RESTful APIs. |
-| [Server::__construct](#Server__construct) | Constructor |
-| [Server::create](#Servercreate) | Factory. |
-| [Server::setControllerFactory](#ServersetControllerFactory) |  |
-| [Server::getControllerFactory](#ServergetControllerFactory) |  |
-| [Server::setHttpStatusCodes](#ServersetHttpStatusCodes) | If the lib should send HTTP status codes. |
-| [Server::getHttpStatusCodes](#ServergetHttpStatusCodes) |  |
+| [Server::__construct](#Server__construct) | Create a new server. |
+| [Server::create](#Servercreate) | Creates controller factory. User for internal testing. |
+| [Server::setControllerFactory](#ServersetControllerFactory) | Change the current controller factory. |
+| [Server::getControllerFactory](#ServergetControllerFactory) | Return the current controller factory. |
+| [Server::setHttpStatusCodes](#ServersetHttpStatusCodes) | Enable / Disable sending of HTTP status codes. |
+| [Server::getHttpStatusCodes](#ServergetHttpStatusCodes) | Return if HTTP status codes are sent. |
 | [Server::setCheckAccess](#ServersetCheckAccess) | Set the check access function/method. |
-| [Server::getCheckAccess](#ServergetCheckAccess) | Getter for checkAccess |
-| [Server::setFallbackMethod](#ServersetFallbackMethod) | If this controller can not find a route,we fire this method and send the result. |
-| [Server::fallbackMethod](#ServerfallbackMethod) | Getter for fallbackMethod |
+| [Server::getCheckAccess](#ServergetCheckAccess) | Returns the current check access function/method. |
+| [Server::setFallbackMethod](#ServersetFallbackMethod) | Set fallback method if no route is found. |
+| [Server::getFallbackMethod](#ServergetFallbackMethod) | Returns the fallback method. |
 | [Server::setDescribeRoutes](#ServersetDescribeRoutes) | Sets whether the service should serve route descriptionsthrough the OPTIONS method. |
-| [Server::getDescribeRoutes](#ServergetDescribeRoutes) | Getter for describeRoutes. |
+| [Server::getDescribeRoutes](#ServergetDescribeRoutes) | Returns whether the service should serve route descriptions |
 | [Server::setExceptionHandler](#ServersetExceptionHandler) | Send exception function/method. Will be fired if a route-method throws a exception. |
-| [Server::getExceptionHandler](#ServergetExceptionHandler) | Getter for checkAccess |
+| [Server::getExceptionHandler](#ServergetExceptionHandler) | Returns the current exception handler function/method. |
 | [Server::setDebugMode](#ServersetDebugMode) | If this is true, we send file, line and backtrace if an exception has been thrown. |
-| [Server::getDebugMode](#ServergetDebugMode) | Getter for checkAccess |
+| [Server::getDebugMode](#ServergetDebugMode) | Returns if debug mode is enabled. |
 | [Server::done](#Serverdone) | Alias for getParentController() |
 | [Server::getParentController](#ServergetParentController) | Returns the parent controller |
 | [Server::setTriggerUrl](#ServersetTriggerUrl) | Set the URL that triggers the controller. |
@@ -59,20 +59,20 @@
 | [Server::addOptionsRoute](#ServeraddOptionsRoute) | Same as addRoute, but limits to OPTIONS. |
 | [Server::addDeleteRoute](#ServeraddDeleteRoute) | Same as addRoute, but limits to DELETE. |
 | [Server::removeRoute](#ServerremoveRoute) | Removes a route. |
-| [Server::setClass](#ServersetClass) | Sets the controller class. |
-| [Server::addSubController](#ServeraddSubController) | Attach a sub controller. |
+| [Server::setClass](#ServersetClass) | Sets the controller class to use for function endpoints. |
+| [Server::addSubController](#ServeraddSubController) | Attach a sub controller to this controller. |
 | [Server::normalizeUrl](#ServernormalizeUrl) | Normalize $pUrl. Cuts of the trailing slash. |
 | [Server::send](#Serversend) | Sends data to the client with 200 http code. |
-| [Server::camelCase2Dashes](#ServercamelCase2Dashes) |  |
-| [Server::collectRoutes](#ServercollectRoutes) | Setup automatic routes. |
+| [Server::camelCase2Dashes](#ServercamelCase2Dashes) | Convert string from camel case to dashes. |
+| [Server::collectRoutes](#ServercollectRoutes) | Automatically collect routes from class. |
 | [Server::simulateCall](#ServersimulateCall) | Simulates a HTTP Call. |
 | [Server::run](#Serverrun) | Fire the magic! |
-| [Server::fireMethod](#ServerfireMethod) |  |
+| [Server::fireMethod](#ServerfireMethod) | Fire a method. |
 | [Server::describe](#Serverdescribe) | Describe a route or the whole controller with all routes. |
 | [Server::getMethodMetaData](#ServergetMethodMetaData) | Fetches all meta data informations as params, return type etc. |
-| [Server::parsePhpDoc](#ServerparsePhpDoc) | Parse phpDoc string and returns an array. |
-| [Server::argumentName](#ServerargumentName) | If the name is a camelcased one whereas the first char is lowercased,then we remove the first char and set first char to lower case. |
-| [Server::findRoute](#ServerfindRoute) | Find and return the route for $pUri. |
+| [Server::parsePhpDoc](#ServerparsePhpDoc) | Parse phpDoc string and returns an array of attributes. |
+| [Server::argumentName](#ServerargumentName) | Set first char to lower case. |
+| [Server::findRoute](#ServerfindRoute) | Find and return the route for the URL. |
 
 ## Client
 
@@ -236,7 +236,7 @@ Client::getMethod(  ): string
 
 **Return Value:**
 
-'get', 'post', 'put', 'delete', 'head', 'options', 'patch'
+'get', 'post', 'put', 'delete', 'head', 'options', or 'patch'
 
 
 
@@ -256,7 +256,7 @@ Client::setMethod( string pMethod ): \RestService\Client
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMethod` | **string** | &#039;get&#039;, &#039;post&#039;, &#039;put&#039;, &#039;delete&#039;, &#039;head&#039;, &#039;options&#039;, &#039;patch&#039; |
+| `pMethod` | **string** | &#039;get&#039;, &#039;post&#039;, &#039;put&#039;, &#039;delete&#039;, &#039;head&#039;, &#039;options&#039;, or &#039;patch&#039; |
 
 
 **Return Value:**
@@ -268,7 +268,7 @@ $this Client instance.
 ---
 ### Client::setContentLength
 
-Set header Content-Length from data.
+Set header "Content-Length" from data.
 
 ```php
 Client::setContentLength( mixed pMessage ): void
@@ -293,7 +293,7 @@ Client::setContentLength( mixed pMessage ): void
 ---
 ### Client::asJSON
 
-Converts data to pretty json.
+Converts data to pretty JSON.
 
 ```php
 Client::asJSON( mixed pMessage ): string
@@ -318,7 +318,7 @@ JSON version of the original data.
 ---
 ### Client::asXML
 
-Converts data to xml.
+Converts data to XML.
 
 ```php
 Client::asXML( mixed pMessage, string pParentTagName = '', int pDepth = 1, bool pHeader = true ): string
@@ -346,7 +346,7 @@ XML version of the original data.
 ---
 ### Client::asText
 
-Converts data to pretty json.
+Converts data to text.
 
 ```php
 Client::asText( mixed pMessage ): string
@@ -422,7 +422,7 @@ $this Client instance.
 ---
 ### Client::getURL
 
-Returns the current endpoint url.
+Returns the current endpoint URL.
 
 ```php
 Client::getURL(  ): string
@@ -434,14 +434,14 @@ Client::getURL(  ): string
 
 **Return Value:**
 
-The current endpoint url.
+The current endpoint URL.
 
 
 
 ---
 ### Client::setURL
 
-Set the current endpoint url.
+Set the current endpoint URL.
 
 ```php
 Client::setURL( string pUrl ): \RestService\Client
@@ -454,7 +454,7 @@ Client::setURL( string pUrl ): \RestService\Client
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUrl` | **string** | The new endpoint url. |
+| `pUrl` | **string** | The new endpoint URL. |
 
 
 **Return Value:**
@@ -530,10 +530,10 @@ A REST server class for RESTful APIs.
 
 ### Server::__construct
 
-Constructor
+Create a new server.
 
 ```php
-Server::__construct( string pTriggerUrl, string|object pControllerClass = null, \RestService\Server pParentController = null ): mixed
+Server::__construct( string pTriggerUrl, string|object pControllerClass = null, \RestService\Server pParentController = null ): void
 ```
 
 
@@ -543,9 +543,9 @@ Server::__construct( string pTriggerUrl, string|object pControllerClass = null, 
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pTriggerUrl` | **string** |  |
-| `pControllerClass` | **string\|object** |  |
-| `pParentController` | **\RestService\Server** |  |
+| `pTriggerUrl` | **string** | The URL that triggers the controller. |
+| `pControllerClass` | **string\|object** | The default endpoint function class. |
+| `pParentController` | **\RestService\Server** | The parent controller. |
 
 
 **Return Value:**
@@ -557,7 +557,7 @@ Server::__construct( string pTriggerUrl, string|object pControllerClass = null, 
 ---
 ### Server::create
 
-Factory.
+Creates controller factory. User for internal testing.
 
 ```php
 Server::create( string pTriggerUrl, string pControllerClass = '' ): \RestService\Server
@@ -570,20 +570,20 @@ Server::create( string pTriggerUrl, string pControllerClass = '' ): \RestService
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pTriggerUrl` | **string** |  |
-| `pControllerClass` | **string** |  |
+| `pTriggerUrl` | **string** | The URL that triggers the controller. |
+| `pControllerClass` | **string** | The default endpoint function class. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::setControllerFactory
 
-
+Change the current controller factory.
 
 ```php
 Server::setControllerFactory( callable controllerFactory ): \RestService\Server
@@ -601,14 +601,14 @@ Server::setControllerFactory( callable controllerFactory ): \RestService\Server
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::getControllerFactory
 
-
+Return the current controller factory.
 
 ```php
 Server::getControllerFactory(  ): callable
@@ -620,39 +620,39 @@ Server::getControllerFactory(  ): callable
 
 **Return Value:**
 
-
+$controllerFactory The controller factory.
 
 
 
 ---
 ### Server::setHttpStatusCodes
 
-If the lib should send HTTP status codes.
+Enable / Disable sending of HTTP status codes.
 
 ```php
 Server::setHttpStatusCodes( bool pWithStatusCode ): \RestService\Server
 ```
 
-Some Client libs does not support it.
+
 
 
 **Parameters:**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pWithStatusCode` | **bool** |  |
+| `pWithStatusCode` | **bool** | If true, send HTTP status codes. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::getHttpStatusCodes
 
-
+Return if HTTP status codes are sent.
 
 ```php
 Server::getHttpStatusCodes(  ): bool
@@ -664,7 +664,7 @@ Server::getHttpStatusCodes(  ): bool
 
 **Return Value:**
 
-
+$withStatusCode If true, send HTTP status codes.
 
 
 
@@ -677,26 +677,26 @@ Set the check access function/method.
 Server::setCheckAccess( callable pFn ): \RestService\Server
 ```
 
-Will fired with arguments: (url, route)
+Called with arguments: (url, route, method, arguments)
 
 
 **Parameters:**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pFn` | **callable** |  |
+| `pFn` | **callable** | The check access function/method. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::getCheckAccess
 
-Getter for checkAccess
+Returns the current check access function/method.
 
 ```php
 Server::getCheckAccess(  ): callable
@@ -708,15 +708,14 @@ Server::getCheckAccess(  ): callable
 
 **Return Value:**
 
-
+$checkAccessFn The check access function/method.
 
 
 
 ---
 ### Server::setFallbackMethod
 
-If this controller can not find a route,
-we fire this method and send the result.
+Set fallback method if no route is found.
 
 ```php
 Server::setFallbackMethod( string pFn ): \RestService\Server
@@ -729,22 +728,22 @@ Server::setFallbackMethod( string pFn ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pFn` | **string** | Methodname of current attached class |
+| `pFn` | **string** | The fallback method. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
-### Server::fallbackMethod
+### Server::getFallbackMethod
 
-Getter for fallbackMethod
+Returns the fallback method.
 
 ```php
-Server::fallbackMethod(  ): string
+Server::getFallbackMethod(  ): string
 ```
 
 
@@ -753,7 +752,7 @@ Server::fallbackMethod(  ): string
 
 **Return Value:**
 
-
+$fallbackMethod The fallback method.
 
 
 
@@ -774,19 +773,19 @@ Server::setDescribeRoutes( bool pDescribeRoutes ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pDescribeRoutes` | **bool** |  |
+| `pDescribeRoutes` | **bool** | If true, serve route descriptions. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::getDescribeRoutes
 
-Getter for describeRoutes.
+Returns whether the service should serve route descriptions
 
 ```php
 Server::getDescribeRoutes(  ): bool
@@ -798,7 +797,7 @@ Server::getDescribeRoutes(  ): bool
 
 **Return Value:**
 
-
+$describeRoutes If true, serve route descriptions.
 
 
 
@@ -819,19 +818,19 @@ Arguments: (exception)
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pFn` | **callable** |  |
+| `pFn` | **callable** | The exception function/method. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::getExceptionHandler
 
-Getter for checkAccess
+Returns the current exception handler function/method.
 
 ```php
 Server::getExceptionHandler(  ): callable
@@ -843,7 +842,7 @@ Server::getExceptionHandler(  ): callable
 
 **Return Value:**
 
-
+$sendExceptionFn The exception handler function/method.
 
 
 
@@ -863,19 +862,19 @@ Server::setDebugMode( bool pDebugMode ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pDebugMode` | **bool** |  |
+| `pDebugMode` | **bool** | If true, send debug info. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
 ---
 ### Server::getDebugMode
 
-Getter for checkAccess
+Returns if debug mode is enabled.
 
 ```php
 Server::getDebugMode(  ): bool
@@ -887,7 +886,7 @@ Server::getDebugMode(  ): bool
 
 **Return Value:**
 
-
+$debugMode If true, send debug info.
 
 
 
@@ -906,7 +905,7 @@ Server::done(  ): \RestService\Server
 
 **Return Value:**
 
-
+$this The server instance.
 
 
 
@@ -925,7 +924,7 @@ Server::getParentController(  ): \RestService\Server
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
@@ -945,12 +944,12 @@ Server::setTriggerUrl( pTriggerUrl ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pTriggerUrl` | **** |  |
+| `pTriggerUrl` | **** | The URL that triggers the controller. |
 
 
 **Return Value:**
 
-
+$this The server instance.
 
 
 
@@ -969,7 +968,7 @@ Server::getTriggerUrl(  ): string
 
 **Return Value:**
 
-
+$triggerUrl The trigger url.
 
 
 
@@ -989,12 +988,12 @@ Server::setClient( \RestService\Client|string pClient ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pClient` | **\RestService\Client\|string** |  |
+| `pClient` | **\RestService\Client\|string** | The endpoint client. |
 
 
 **Return Value:**
 
-$this
+$this The server instance.
 
 
 
@@ -1013,7 +1012,7 @@ Server::getClient(  ): \RestService\Client
 
 **Return Value:**
 
-
+$client The client.
 
 
 
@@ -1033,13 +1032,13 @@ Server::sendBadRequest( pCode, pMessage ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pCode` | **** |  |
-| `pMessage` | **** |  |
+| `pCode` | **** | The HTTP status code. |
+| `pMessage` | **** | The message to send. |
 
 
 **Return Value:**
 
-
+The response.
 
 
 
@@ -1059,13 +1058,13 @@ Server::sendError( pCode, pMessage ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pCode` | **** |  |
-| `pMessage` | **** |  |
+| `pCode` | **** | The HTTP status code. |
+| `pMessage` | **** | The message to send. |
 
 
 **Return Value:**
 
-
+The response.
 
 
 
@@ -1075,7 +1074,7 @@ Server::sendError( pCode, pMessage ): string
 Sends a exception response to the client.
 
 ```php
-Server::sendException( pException ): mixed
+Server::sendException( pException ): void
 ```
 
 
@@ -1085,7 +1084,7 @@ Server::sendException( pException ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pException` | **** |  |
+| `pException` | **** | The exception to send. |
 
 
 **Return Value:**
@@ -1110,14 +1109,14 @@ Server::addRoute( string pUri, callable|string pCb, string pHttpMethod = '_all_'
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 | `pHttpMethod` | **string** | If you want to limit to a HTTP method. |
 
 
 **Return Value:**
 
-
+$this        The server instance.
 
 
 
@@ -1137,13 +1136,13 @@ Server::addGetRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this        The server instance.
 
 
 
@@ -1163,13 +1162,13 @@ Server::addPostRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
@@ -1189,13 +1188,13 @@ Server::addPutRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
@@ -1215,13 +1214,13 @@ Server::addPatchRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
@@ -1241,13 +1240,13 @@ Server::addHeadRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
@@ -1267,13 +1266,13 @@ Server::addOptionsRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
@@ -1293,13 +1292,13 @@ Server::addDeleteRoute( string pUri, callable|string pCb ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 | `pCb` | **callable\|string** | The method name of the passed controller or a php callable. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
@@ -1319,22 +1318,22 @@ Server::removeRoute( string pUri ): \RestService\Server
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to match. |
 
 
 **Return Value:**
 
-
+$this       The server instance.
 
 
 
 ---
 ### Server::setClass
 
-Sets the controller class.
+Sets the controller class to use for function endpoints.
 
 ```php
-Server::setClass( string|object pClass ): mixed
+Server::setClass( string|object pClass ): void
 ```
 
 
@@ -1344,7 +1343,7 @@ Server::setClass( string|object pClass ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pClass` | **string\|object** |  |
+| `pClass` | **string\|object** | The class name or object. |
 
 
 **Return Value:**
@@ -1356,7 +1355,7 @@ Server::setClass( string|object pClass ): mixed
 ---
 ### Server::addSubController
 
-Attach a sub controller.
+Attach a sub controller to this controller.
 
 ```php
 Server::addSubController( string pTriggerUrl, mixed pControllerClass = '' ): \RestService\Server
@@ -1369,13 +1368,13 @@ Server::addSubController( string pTriggerUrl, mixed pControllerClass = '' ): \Re
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pTriggerUrl` | **string** |  |
+| `pTriggerUrl` | **string** | The url to trigger the sub controller. |
 | `pControllerClass` | **mixed** | A class name (autoloader required) or a instance of a class. |
 
 
 **Return Value:**
 
-new created Server. Use done() to switch the context back to the parent.
+$controller         new created Server. Use done() to switch the context back to the parent.
 
 
 
@@ -1385,7 +1384,7 @@ new created Server. Use done() to switch the context back to the parent.
 Normalize $pUrl. Cuts of the trailing slash.
 
 ```php
-Server::normalizeUrl( string &pUrl ): mixed
+Server::normalizeUrl( string &pUrl ): void
 ```
 
 
@@ -1395,7 +1394,7 @@ Server::normalizeUrl( string &pUrl ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUrl` | **string** |  |
+| `pUrl` | **string** | The url to normalize. |
 
 
 **Return Value:**
@@ -1410,7 +1409,7 @@ Server::normalizeUrl( string &pUrl ): mixed
 Sends data to the client with 200 http code.
 
 ```php
-Server::send( pData ): mixed
+Server::send( pData ): void
 ```
 
 
@@ -1420,7 +1419,7 @@ Server::send( pData ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pData` | **** |  |
+| `pData` | **** | The data to send. |
 
 
 **Return Value:**
@@ -1432,7 +1431,7 @@ Server::send( pData ): mixed
 ---
 ### Server::camelCase2Dashes
 
-
+Convert string from camel case to dashes.
 
 ```php
 Server::camelCase2Dashes( string pValue ): string
@@ -1445,19 +1444,19 @@ Server::camelCase2Dashes( string pValue ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pValue` | **string** |  |
+| `pValue` | **string** | The string to convert. |
 
 
 **Return Value:**
 
-
+$pValue The converted string.
 
 
 
 ---
 ### Server::collectRoutes
 
-Setup automatic routes.
+Automatically collect routes from class.
 
 ```php
 Server::collectRoutes(  ): \RestService\Server
@@ -1469,7 +1468,7 @@ Server::collectRoutes(  ): \RestService\Server
 
 **Return Value:**
 
-
+$this The server instance.
 
 
 
@@ -1489,13 +1488,13 @@ Server::simulateCall( string pUri, string pMethod = 'get' ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The uri to call. |
 | `pMethod` | **string** | The HTTP Method |
 
 
 **Return Value:**
 
-
+The response.
 
 
 
@@ -1514,17 +1513,17 @@ Searches the method and sends the data to the client.
 
 **Return Value:**
 
-
+The response.
 
 
 
 ---
 ### Server::fireMethod
 
-
+Fire a method.
 
 ```php
-Server::fireMethod( mixed pMethod, mixed pController, mixed pArguments ): mixed
+Server::fireMethod( string pMethod, mixed pController, mixed pArguments ): mixed
 ```
 
 
@@ -1534,14 +1533,14 @@ Server::fireMethod( mixed pMethod, mixed pController, mixed pArguments ): mixed
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pMethod` | **mixed** |  |
+| `pMethod` | **string** | The method to fire. |
 | `pController` | **mixed** |  |
 | `pArguments` | **mixed** |  |
 
 
 **Return Value:**
 
-
+The response.
 
 
 
@@ -1561,13 +1560,13 @@ Server::describe( string pUri = null, bool pOnlyRoutes = false ): array
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
-| `pOnlyRoutes` | **bool** |  |
+| `pUri` | **string** | The uri to describe. |
+| `pOnlyRoutes` | **bool** | Whether to only describe the routes. |
 
 
 **Return Value:**
 
-
+The description.
 
 
 
@@ -1593,14 +1592,14 @@ Server::getMethodMetaData( \ReflectionMethod pMethod, array pRegMatches = null )
 
 **Return Value:**
 
-
+The meta data.
 
 
 
 ---
 ### Server::parsePhpDoc
 
-Parse phpDoc string and returns an array.
+Parse phpDoc string and returns an array of attributes.
 
 ```php
 Server::parsePhpDoc( string pString ): array
@@ -1613,20 +1612,19 @@ Server::parsePhpDoc( string pString ): array
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pString` | **string** |  |
+| `pString` | **string** | The phpDoc string. |
 
 
 **Return Value:**
 
-
+The attribute array.
 
 
 
 ---
 ### Server::argumentName
 
-If the name is a camelcased one whereas the first char is lowercased,
-then we remove the first char and set first char to lower case.
+Set first char to lower case.
 
 ```php
 Server::argumentName( string pName ): string
@@ -1639,19 +1637,19 @@ Server::argumentName( string pName ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pName` | **string** |  |
+| `pName` | **string** | The name. |
 
 
 **Return Value:**
 
-
+The name.
 
 
 
 ---
 ### Server::findRoute
 
-Find and return the route for $pUri.
+Find and return the route for the URL.
 
 ```php
 Server::findRoute( string pUri, string pMethod = '_all_' ): array|bool
@@ -1664,13 +1662,13 @@ Server::findRoute( string pUri, string pMethod = '_all_' ): array|bool
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pUri` | **string** |  |
+| `pUri` | **string** | The URL. |
 | `pMethod` | **string** | limit to method. |
 
 
 **Return Value:**
 
-
+The route or false if not found.
 
 
 

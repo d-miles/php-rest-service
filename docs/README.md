@@ -51,7 +51,7 @@ RewriteRule (.+) index.php/$1 [L,QSA]
 ### Manual Endpoint Creation
 
 With manual endpoint creation, you must define a new route for each endpoint you want to expose.
-This is done by using the `addGetRoute()`, `addPostRoute()`, `addPutRoute()`, `addDeleteRoute()`, `addPatchRoute()`, `addHeadRoute()`, `addOptionsRoute()` and `addRoute()` methods. 
+This is done by using the [`addGetRoute()`](phpdoc/#serveraddgetroute), [`addPostRoute()`](phpdoc/#serveraddpostroute), [`addPutRoute()`](phpdoc/#serveraddputroute),[`addDeleteRoute()`](phpdoc/#serveradddeleteroute), [`addPatchRoute()`](phpdoc/#serveraddpatchroute), [`addHeadRoute()`](phpdoc/#serveraddheadroute), [`addOptionsRoute()`](phpdoc/#serveraddoptionsroute) and [`addRoute()`](phpdoc/#serveraddroute) methods. 
 
 All route methods accept a path and a callback (e.g. `addGetRoute('path', 'callbackFunction')`), while the `addRoute()` method also accepts the HTTP method (e.g. `addRoute('path', 'callbackFunction', 'get')`). If no method is specified, the default method is `_all_`.
 
@@ -76,7 +76,7 @@ Server::create('/')
 
 ### Automatic Endpoint Creation
 
-With automatic endpoint creation, you can supply a PHP class that contains endpoint functions. The router will then scan the class for functions that start with `get`, `post`, `put`, `delete`, `patch`, `head` or `options` and add the corresponding route.
+With automatic endpoint creation, you can supply a PHP class that contains endpoint functions. By calling the [`collectRoutes()`](phpdoc/#servercollectroutes) method, the router will then scan the class for functions that start with `get`, `post`, `put`, `delete`, `patch`, `head` or `options` and add the corresponding route.
 
 Function names will be converted from camel case to dashes,  so `getFooBar()` will be converted to `/foo-bar`.
 
@@ -115,12 +115,93 @@ Bot methods will generate the following endpoints:
 + GET  /use/this/name
 ```
 
+## Advanced Usage
+
+### Regex in Paths
+
+For more advanced routing, you can use regular expressions in the path. Either through the `path` argument in the [`addRoute()`](phpdoc/#serveraddroute) method, or the `@url` annotation in the function comment.
+
+For example, in order to match all routes that start with `/foo`, you can use the following:
+
+```php
+->addGetRoute('foo/.*', 'getFoo')
+```
+
+or 
+
+```php
+/**
+ * @url foo/.*
+ */
+public function getFoo(){
+  return 'Yay!';
+}
+```
+
+Note that the API server wraps the path / url argument in `^` and `$` to match the entire path, with the delimiter `|`.
+
+### URL Parameters
+
+To capture parameters from the URL for use as function arguments, simply use regex capture groups in the `path` argument of the [`addRoute()`](phpdoc/#serveraddroute) method, or the `@url` annotation in the function comment.
+
+For example, in order to match the `:id` and `:action` parameters in the following URL, `/foo/:id/something/:action`, where `:id` is a int and `:action` is a string, you can use the following:
+
+```php
+->addPostRoute('foo/(\d+)/something/(\w+)', 'postFoo')
+```
+
+or 
+
+```php
+/**
+ * @url foo/(\d+)/something/(\w+)
+ */
+public function postFoo($arg1, $arg2){
+  return 'Yay!';
+}
+```
+
+The API server will automatically bind the captured parameters to the first `n` arguments of the function where `n` is the number of capture groups in the regex pattern.
+
+You can still use GET, POST, and PUT parameters in the endpoint, but they must be bound to variables after the capture groups.
+
+For example, in order to add a POST parameter `content` to the endpoint, you can use the following:
+
+```php
+/**
+ * @url foo/(\d+)/something/(\w+)
+ */
+public function postFoo($arg1, $arg2, $content){
+  return 'Yay!';
+}
+```
+
+### Access Control
+
+In order to restrict access to endpoints, you can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method to supply an access control function.
+
+The access control function will be called with the following arguments:
+
+`function($url, $route, $method, $arguments)`
+
+In order to deny access, simply throw an exception inside of the function.
+
+For example, in order to deny POST access to the `/foo` endpoint if the `X-API-KEY` header is not set, use the following:
+
+```php
+->setCheckAccess(function($url, $route, $method, $args) {
+    if ($method == "post" && $route == "foo" && !isset($_SERVER['HTTP_X_API_KEY'])) {
+        throw new \Exception("Access Denied", 401);
+    }
+})
+```
+
 ## Responses
 
 The response body is always a JSON object containing a status code and the actual data.
 If a exception has been thrown, it contains the error code, the exception class name as error and the message as message.
 
-Some examples:
+### Examples
 
 ```json
 {
@@ -143,7 +224,76 @@ Some examples:
 }
 ```
 
-For verbose error messages, enable debug mode on the desired controller by using the `->setDebugMode(true)` method:
+### Error Handling
+
+The API Server will automatically throw a 500 error if:
+* A required argument is missing
+* A requested route cannot be found
+* The server cannot find a specified client
+* The server cannot instantiate a specified class
+* The requested method cannot be found in a specified class
+
+Additionally, you can throw your own errors by simply calling
+```php
+throw new \Exception('My custom error');
+```
+
+which will result in 
+
+```json
+{
+  "status": 500,
+  "error": "Exception",
+  "message": "My custom error"
+}
+```
+
+or 
+```php
+throw new \Exception('Another error', 123);
+```
+
+which will result in
+
+```json
+{
+  "status": 123,
+  "error": "Exception",
+  "message": "Another error"
+}
+```
+
+Alternatively, you can provide your own error handler by using the [`setExceptionHandler()`](phpdoc/#serversetexceptionhandler) method.
+
+```php
+// Overwrite error messages based on code
+$server->setExceptionHandler(function(\Exception $e) use ($server) {
+    $code = $e->getCode();
+    $switch ($code) {
+        case 400:
+            $message = 'Bad Request';
+            break;
+        case 404:
+            $message = 'Not Found';
+            break;
+        case 500:
+            $message = 'Internal Server Error';
+            break;
+        default:
+            $message = $e->getMessage();
+    }
+    
+    $server->getClient()->sendResponse($code, array(
+        'status' => $code,
+        'error' => get_class($e),
+        'message' => $message
+    ));
+})
+```
+
+### Debugging
+
+For verbose error messages, enable debug mode on the desired controller by using the [`setDebugMode(true)`](phpdoc/#serversetdebugmode)` method:
 
 ```php
 Server::create('/', 'myRestApi\Admin')
@@ -164,10 +314,6 @@ This will result in messages like:
     "trace": <debugTrace>
 }
 ```
-
-## PHPDoc
-
-For the full class-level documentation, please refer to the [PHPDoc](PHPDoc) documentation.
 
 ## License
 
