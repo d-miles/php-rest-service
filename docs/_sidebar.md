@@ -7,7 +7,7 @@
   * [Web Server Configuration](/#web-server-configuration)
   * [Basic Usage](/#basic-usage)
     * [Manual Endpoint Creation](/#manual-endpoint-creation)
-    * [Auto Endpoint Creation](/#automatic-endpoint-creation)
+    * [Auto Endpoint Creation](/#auto-endpoint-creation)
   * [Advanced Usage](/#basic-usage)
     * [Regex in Paths](/#regex-in-paths)
     * [URL Parameters](/#url-parameters)
