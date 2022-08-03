@@ -35,9 +35,9 @@ Copy `Server.php` to your directory and include with `include 'Server.php';`.
 
 ## Web Server Configuration
 
-PHP-REST-Service acts as a single page application, so all requests must be sent to the index.php file (or the file you want to serve).
+PHP REST Service acts as a single page application, so all requests must be sent to the index.php file (or the file you want to serve).
 
-For example, on apache, you can add the following lines to your `.htaccess` file:
+For example, on apache, you can add the following lines to your `.htaccess` file which will redirect all requests for directories or non-existant files to index.php:
 
 ```apacheconf
 RewriteEngine On
@@ -74,7 +74,7 @@ Server::create('/')
 
 ```
 
-### Automatic Endpoint Creation
+### Auto Endpoint Creation
 
 With automatic endpoint creation, you can supply a PHP class that contains endpoint functions. By calling the [`collectRoutes()`](phpdoc/#servercollectroutes) method, the router will then scan the class for functions that start with `get`, `post`, `put`, `delete`, `patch`, `head` or `options` and add the corresponding route.
 
@@ -195,6 +195,46 @@ For example, in order to deny POST access to the `/foo` endpoint if the `X-API-K
     }
 })
 ```
+
+### Logging
+
+You can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method for any sort of pre-response logic you wish to execute, such as logging:
+
+```php
+->setCheckAccess(function($url, $route, $method, $args) {
+    $log  = "User: ".$_SERVER['REMOTE_ADDR'].' - '.date("F j, Y, g:i a").PHP_EOL.
+    "URL: ".$url.PHP_EOL.
+    "Method: ".$method.PHP_EOL.
+    "Route: ".$route.PHP_EOL.
+    "Args: ".json_encode($args).PHP_EOL.
+    "---------------------------------------------".PHP_EOL;
+    file_put_contents('log_'.date("j.n.Y").'.log', $log,  FILE_APPEND | LOCK_EX);
+})
+```
+
+### Rate Limiting
+
+[`setCheckAccess()`](phpdoc/#serversetcheckaccess) could also be used as a rate limiter:
+
+```php
+->setCheckAccess(function($url, $route, $method, $args) {
+    $redis = new \Redis();
+    $redis->connect('localhost');
+
+    $key = "api_".$_SERVER['REMOTE_ADDR'];
+    $limit = 10;
+    $time = 60;
+    
+    $count = $redis->get($key);
+    if ($count >= $limit) {
+        throw new \Exception("Rate Limit Exceeded", 429);
+    }
+    $redis->incr($key);
+    $redis->expire($key, $time);
+})
+```
+
+!> Note: You may only assign one checkAccess function per controller, so if you want to execute multiple pre-response actions, you must combine them into one function.
 
 ## Responses
 
