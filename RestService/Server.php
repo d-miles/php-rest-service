@@ -346,10 +346,15 @@ class Client {
     public function asText($pMessage) {
         if (php_sapi_name() !== 'cli' )
             header('Content-Type: text/plain; charset=utf-8');
-        
-        $this->setContentLength($pMessage);
 
-        return $pMessage;
+        $text = '';
+        foreach ($pMessage as $key => $data) {
+            $key = is_numeric($key) ? '' : $key.': ';
+            $text .= $key.$data."\n";
+        }
+        $this->setContentLength($text);
+
+        return $text;
     }
 
     /**
@@ -625,7 +630,7 @@ class Server
             if ($pParentController->getCheckAccess())
                 $this->setCheckAccess($pParentController->getCheckAccess());
 
-            if ($pParentController->getApiSpec())
+            if (isset($pParentController->getApiSpec()[0]))
                 $this->setApiSpec($pParentController->getApiSpec()[0], $pParentController->getApiSpec()[1]);
 
             if ($pParentController->getExceptionHandler())
@@ -1277,6 +1282,7 @@ class Server
 
         $arguments = array();
         $requiredMethod = $this->getClient()->getMethod();
+        $format = $this->getClient()->getOutputFormat();
 
         //does the requested uri exist?
         list($callableMethod, $regexArguments, $method, $routeUri) = $this->findRoute($uri, $requiredMethod);
@@ -1286,47 +1292,214 @@ class Server
             $this->send($description);
         }
 
-        if (!$callableMethod || $uri == 'spec' && $requiredMethod == 'get' && $this->getApiSpec() != null) {
+        if (!$callableMethod && $uri == 'spec' && $requiredMethod == 'get' && $this->getApiSpec() != null) {
             header('HTTP/1.0 200 OK');
             header('Content-Type: application/json; charset=utf-8');
             $spec['openapi'] = '3.0.0';
             $spec['info'] = $this->getApiSpec();
 
             $pUri = null;
-            $routes = array("/spec" => array("get" => array("summary" => "Get the API Specification", "responses" => array("200" => array("description" => "Successful operation")))));
-
+            $routes = array();
             foreach ($this->routes as $routeUri => $routeMethods) {
 
                 $matches = array();
-                if (!$pUri || ($pUri && preg_match('|^'.$routeUri.'$|', $pUri, $matches))) {
+                if (!$pUri || ($pUri && preg_match('|^'.$routeUri.'$|', $pUri, $matches))) {                 
     
                     if ($matches) {
                         array_shift($matches);
                     }
                     $path = '/'.$routeUri;
+                    $finalPath = '/'.$routeUri;
                     $def = array();
-                    
     
-                    foreach ($routeMethods as $method => $phpMethod) {
-    
-                        if (is_string($phpMethod)) {
-                            $ref = new \ReflectionClass($this->controller);
-                            $refMethod = $ref->getMethod($phpMethod);
-                        } else {
-                            $refMethod = new \ReflectionFunction($phpMethod);
-                        }
-                        $metadata = $this->getMethodMetaData($refMethod);
-                        $def[$method] = array(
-                            "parameters" => $metadata['parameters'],
-                            "responses" => array(
-                                "success" => $metadata['return']['type'],
+                        foreach ($routeMethods as $method => $phpMethod) {        
+                            if (is_string($phpMethod)) {
+                                $ref = new \ReflectionClass($this->controller);
+                                $refMethod = $ref->getMethod($phpMethod);
+                            } else {
+                                $refMethod = new \ReflectionFunction($phpMethod);
+                            }
+                            $metadata = $this->getMethodMetaData($refMethod);
+                            preg_match_all('~ \( (?: [^()]+ | (?R) )*+ \) ~x', $routeUri, $paramMatches);
+                            $place = 0;
+
+                                if (isset($paramMatches[0]) && count($paramMatches[0]) > 0) {
+                                    foreach ($paramMatches[0] as $match) {
+                                        $param = array_keys($metadata['parameters'])[$place];
+                                        $replace = "{".$param."}";
+                                        if (($pos = strpos($path, $match)) !== false) {
+                                            if(substr($match, 0, 2) === "(!" || substr($match, 0, 3) === "(?!") {
+                                                $path = substr_replace($path, '', $pos, strlen($match));
+                                            }
+                                            else {
+                                                $finalPath = substr_replace($path, $replace, $pos, strlen($match));
+                                                $metadata['parameters'][$param] = array_merge($metadata['parameters'][$param], array('in' => 'path'));
+                                                $place++;
+                                            }
+                                        }
+                                    }
+                                }
+                        
+                            switch ($metadata['return']['type']) {
+                                case "int":
+                                    $type = array("type" =>  "integer");
+                                    break;
+                                case "integer":
+                                    $type = array("type" =>  "integer");
+                                    break;
+                                case "bool":
+                                    $type = array("type" =>  "boolean");
+                                    break;
+                                case "boolean":
+                                    $type = array("type" =>  "boolean");
+                                    break;
+                                case "string":
+                                    $type = array("type" =>  "string");
+                                    break;
+                                case "number":
+                                    $type = array("type" =>  "number");
+                                    break;
+                                case "array":
+                                    $type = array("type" =>  "array", "items" => (object) null);
+                                    break;
+                                case "object":
+                                    $type = array("type" =>  "object");
+                                    break;
+                                default:
+                                    $type = array("\$ref" => "#/components/schemas/AnyValue");
+                            }
+                            $parameters = array();
+                            foreach ($metadata['parameters'] as $name => $parameter) {
+                                switch ($parameter['type']) {
+                                    case "int":
+                                        $paramType = array("type" =>  "integer");
+                                        break;
+                                    case "integer":
+                                        $paramType = array("type" =>  "integer");
+                                        break;
+                                    case "bool":
+                                        $paramType = array("type" =>  "boolean");
+                                        break;
+                                    case "boolean":
+                                        $paramType = array("type" =>  "boolean");
+                                        break;
+                                    case "string":
+                                        $paramType = array("type" =>  "string");
+                                        break;
+                                    case "number":
+                                        $paramType = array("type" =>  "number");
+                                        break;
+                                    case "array":
+                                        $paramType = array("type" =>  "array", "items" => (object) null);
+                                        break;
+                                    case "object":
+                                        $paramType = array("type" =>  "object");
+                                        break;
+                                    default:
+                                        $paramType = array("\$ref" => "#/components/schemas/AnyValue");
+                                }
+                                $body = array();
+                                if (isset($parameter['in']) && $parameter['in'] == 'path') {
+                                    $parameters[] = array(
+                                        "in" => "path",
+                                        "name" => $name, 
+                                        "required" => true,
+                                        "schema" => $paramType
+                                    );
+                                    if (isset($parameter['description']) && $parameter['description'] != null) {
+                                        $parameters['description'] = $parameter['description'];
+                                    }
+                                } else if ($method == 'get' || $method == 'delete') {
+                                    $parameters[] = array(
+                                        "in" => "query",
+                                        "name" => $name, 
+                                        "required" => (isset($parameter['required'])) ? $parameter['required'] : false,
+                                        "schema" => $paramType
+                                    );
+                                    if (isset($parameter['description']) && $parameter['description'] != null) {
+                                        $parameters['description'] = $parameter['description'];
+                                    }
+                                } else {
+                                    $body[] = array(
+                                        "name" => $name,
+                                        "in" => "body",
+                                        "required" => (isset($parameter['required'])) ? $parameter['required'] : false,
+                                        "schema" => $paramType
+                                    );
+                                    if (isset($parameter['description']) && $parameter['description'] != null) {
+                                        $body['description'] = $parameter['description'];
+                                    }
+                                }
+                            }
+                            switch ($format) {
+                                case "json":
+                                    $outputFormat = "application/json";
+                                    break;
+                                case "xml":
+                                    $outputFormat = "application/xml";
+                                    break;
+                                case "text":
+                                    $outputFormat = "text/plain";
+                                    break;
+                                default:
+                                    $outputFormat = "application/json";
+                            }
+                            $def[$method] = array(
+                                "parameters" => $parameters,
+                                "responses" => array(
+                                    "200" => array(
+                                        "description" => "Successful operation",
+                                        "content" => array(
+                                            $outputFormat => array(
+                                                "schema" => array(
+                                                    "type" => "object",
+                                                    "properties" => array(
+                                                        "status" => array(
+                                                            "type" => "integer",
+                                                        ),
+                                                        "data" => $type,
+                                                    )
+                                                )
+                                                )
+                                            )
+                                        ),
+                                    "500" => array(
+                                        "description" => "Internal Server Error",
+                                        "content" => array(
+                                            $outputFormat => array(
+                                                "schema" => array(
+                                                    "\$ref" => "#/components/schemas/500"
+                                                )
+                                            )
+                                        )
+                                    )
                                 )
-                        );
-                    }
-                    $routes[$path] = $def;
+                            );
+                            if ($method != 'get' && $method != 'delete') {
+                                $requiredParams = array();
+                                $properties = array();
+                                $bodyRequired = false;
+                                foreach ($body as $b) {
+                                    if ($b['required']) {
+                                        $bodyRequired = true;
+                                        $requiredParams[] = $b['name'];
+                                    }
+                                    $properties[$b['name']] =  $b['schema'];
+                                }
+                                if ($bodyRequired) {
+                                    $def[$method]['requestBody']['required'] = true;
+                                }
+                                $def[$method]['requestBody']['content'] = array(
+                                    "application/json" => array("schema" => array("type" => "object", "properties" => $properties)),
+                                    "application/x-www-form-urlencoded" => array("schema" => array("type" => "object", "properties" => $properties))
+                                );
+                            }
+                        }
+                    $routes[$finalPath] = $def;
                 }
             }
     
+            $routes["/spec"] = array("get" => array("summary" => "Get the API Specification", "responses" => array("200" => array("description" => "Successful operation"))));
             // if (!$pUri) {
             //     foreach ($this->controllers as $controller) {
             //         $definition['subController'][$controller->getTriggerUrl()] = $controller->describe(false, true);
@@ -1334,8 +1507,8 @@ class Server
             // }
             $spec['paths'] = $routes;
             $spec['components'] = array("schemas" => array(
-                "200" => array("type" => "object", "properties" => array("status" => array("type" => "integer"), "data" => array("type" => "object"))),
-                "500" => array("type" => "object", "properties" => array("status" => array("type" => "integer"), "error" => array("type" => "string"), "data" => array("type" => "object")))
+                "500" => array("type" => "object", "properties" => array("status" => array("type" => "integer"), "error" => array("type" => "string"), "message" => array("type" => "object"))),
+                "AnyValue" => (object) null
             ));
 
             echo json_encode($spec);
@@ -1532,6 +1705,127 @@ class Server
      * @return array                The meta data.
      */
     public function getMethodMetaData(\ReflectionFunctionAbstract $pMethod, $pRegMatches = null) {
+        $file = $pMethod->getFileName();
+        $startLine = $pMethod->getStartLine();
+
+        $fh = fopen($file, 'r');
+        if (!$fh) return false;
+
+        $lineNr = 1;
+        $lines = array();
+        while (($buffer = fgets($fh)) !== false) {
+            if ($lineNr == $startLine) break;
+            $lines[$lineNr] = $buffer;
+            $lineNr++;
+        }
+        fclose($fh);
+
+        $phpDoc = '';
+        $blockStarted = false;
+        while ($line = array_pop($lines)) {
+
+            if ($blockStarted) {
+                $phpDoc = $line.$phpDoc;
+
+                //if start comment block: /*
+                if (preg_match('/\s*\t*\/\*/', $line)) {
+                    break;
+                }
+                continue;
+            } else {
+                //we are not in a comment block.
+                //if class def, array def or close bracked from fn comes above
+                //then we dont have phpdoc
+                if (preg_match('/^\s*\t*[a-zA-Z_&\s]*(\$|{|})/', $line)) {
+                    break;
+                }
+            }
+
+            $trimmed = trim($line);
+            if ($trimmed == '') continue;
+
+            //if end comment block: */
+            if (preg_match('/\*\//', $line)) {
+                $phpDoc = $line.$phpDoc;
+                $blockStarted = true;
+                //one line php doc?
+                if (preg_match('/\s*\t*\/\*/', $line)) {
+                    break;
+                }
+            }
+        }
+
+        $phpDoc = $this->parsePhpDoc($phpDoc);
+
+        $refParams = $pMethod->getParameters();
+        $params = array();
+
+        $fillPhpDocParam = !isset($phpDoc['param']);
+
+        foreach ($refParams as $param) {
+            $params[$param->getName()] = $param;
+            if ($fillPhpDocParam) {
+                $phpDoc['param'][] = array(
+                    'name' => $param->getName(),
+                    'type' => $this->declaresArray($param)?'array':'mixed'
+                );
+            }
+        }
+
+        $parameters = array();
+
+        if (isset($phpDoc['param'])) {
+            if (is_array($phpDoc['param']) && is_string(key($phpDoc['param'])))
+                $phpDoc['param'] = array($phpDoc['param']);
+
+            $c = 0;
+            foreach ($phpDoc['param'] as $phpDocParam) {
+                if (isset($params[$phpDocParam['name']]))
+                    $param = $params[$phpDocParam['name']];
+                if (!$param) continue;
+                $parameter = array(
+                    'type' => $phpDocParam['type']
+                );
+
+                if ($pRegMatches && is_array($pRegMatches) && $pRegMatches[$c]) {
+                    $parameter['fromRegex'] = '$'.($c+1);
+                }
+
+                $parameter['required'] = !$param->isOptional();
+
+                if ($param->isDefaultValueAvailable()) {
+                    $parameter['default'] = str_replace(array("\n", ' '), '', var_export($param->getDefaultValue(), true));
+                }
+                $parameters[$this->argumentName($phpDocParam['name'])] = $parameter;
+                $c++;
+            }
+        }
+
+        if (!isset($phpDoc['return']))
+            $phpDoc['return'] = array('type' => 'mixed');
+
+        $result = array(
+            'parameters' => $parameters,
+            'return' => $phpDoc['return']
+        );
+
+        if (isset($phpDoc['description']))
+            $result['description'] = $phpDoc['description'];
+
+        if (isset($phpDoc['url']))
+            $result['url'] = $phpDoc['url'];
+
+        return $result;
+    }
+
+    /**
+     * Fetches all meta data informations as params, return type etc.
+     *
+     * @param  \ReflectionMethod    $pMethod
+     * @param  array                $pRegMatches
+     * @return array                The meta data.
+     */
+    public function getOpenApiMethodMetaData(\ReflectionFunctionAbstract $pMethod, $pRegMatches = null) {
         $file = $pMethod->getFileName();
         $startLine = $pMethod->getStartLine();
 
