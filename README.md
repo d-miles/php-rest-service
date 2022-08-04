@@ -17,6 +17,8 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 + Easy to use syntax
 + Regular Expression support
 + Error handling through PHP Exceptions
++ JSON, XML, and plain text responses
++ Automatic OpenAPI specification generation
 + Parameter validation through PHP function signature
 + Can return a summary of all routes or one route through `OPTIONS` method based on PHPDoc (if `OPTIONS` is not overridden)
 + Support of `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD` and `OPTIONS`

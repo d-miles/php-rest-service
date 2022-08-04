@@ -16,6 +16,8 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 + Easy to use syntax
 + Regular Expression support
 + Error handling through PHP Exceptions
++ JSON, XML, and plain text responses
++ Automatic OpenAPI specification generation
 + Parameter validation through PHP function signature
 + Can return a summary of all routes or one route through `OPTIONS` method based on PHPDoc (if `OPTIONS` is not overridden)
 + Support of `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD` and `OPTIONS`
@@ -235,6 +237,90 @@ You can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method for an
 ```
 
 !> Note: You may only assign one checkAccess function per controller, so if you want to execute multiple pre-response actions, you must combine them into one function.
+
+### Response Formatting
+
+#### Built-in Response Formatters
+
+You can use the [`setFormat()`](phpdoc/#clientsetformat) method of the API client to specify the response format.
+Available formats are `json`, `xml`, and `text`.
+
+In order to set the format, you must first access the current client using the [`getClient()`](phpdoc/#servergetclient) method.
+You may only set the format on the top level controller, as each sub controller shares the same client with the parent.
+
+If you would like to have different formats for different endpoints, you must create a new server using the [`create()`](phpdoc/#servercreate) method, rather than creating a new controller.
+
+```php
+Server::create('test')
+    ->getClient()
+        ->setFormat('text')
+    ->getController()
+    ->addGetRoute('', function($test) {
+        return "Hello ". $test;
+    })
+->run();
+```
+
+#### Custom Response Formatters
+
+You can also define your own response formatters using the [`setCustomFormat()`](phpdoc/#clientsetcustomformat) method along with the [`setFormat()`](phpdoc/#clientsetformat) method. The formatting function will be called with a single argument, an associative array of the response data.
+
+For example:
+```
+[
+    'status' => 'success',
+    'data' => 'Hello World!'
+]
+```
+
+The formatter function should set the response header and return a string.
+
+The following example shows an adapted implementation of the plain text formatter:
+
+```php
+Server::create('test')
+    ->getClient()
+        ->setCustomFormat(function($message) {
+            if (php_sapi_name() !== 'cli' )
+                header('Content-Type: text/plain; charset=utf-8');
+
+            $text = '';
+            foreach ($message as $key => $data) {
+                $key = is_numeric($key) ? '' : $key.': ';
+                $text .= $key.$data."\n";
+            }
+            return $text;
+        })
+        ->setFormat('custom')
+    ->getController()
+    ->addGetRoute('', function($test) {
+        return "Hello ". $test;
+    })
+->run();
+```
+
+### OpenAPI Specification
+
+PHP REST Service can automatically generate an OpenAPI specification file for your API. Currently you must generate a seperate specification for each controller. In the future, parent controllers will be able to include child controller endpoints in the specification.
+
+To enable OpenAPI generation, simply use the [`setApiSpec()`](phpdoc/#serversetapispec) method on the desired controller, passing the name and version of your API.
+
+```php
+Server::create('test')
+    -->setApiSpec("My New API", "1.2.3")
+    ->addGetRoute('', function($test) {
+        return "Hello ". $test;
+    })
+```
+
+This will generate an OpenAPI specification in JSON format, accessible at the `/spec` GET endpoint of your API.
+
+Request and response types and descriptions will be pulled from the comment blocks of your endpoint functions.
+If no comment annotations are detected, the request / respone types will default to `AnyValue`.
+
+
+!> Note: If there is another endpoint named `/spec`, it will take priority over the OpenAPI specification.
+
 
 ## Responses
 

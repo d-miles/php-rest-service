@@ -8,6 +8,8 @@
 | [Client::__construct](#Client__construct) | Create a new client. |
 | [Client::setController](#ClientsetController) | Attach client to different controller. |
 | [Client::getController](#ClientgetController) | Return the currently attached controller. |
+| [Client::setCustomFormat](#ClientsetCustomFormat) | Set the custom formatting function/method. |
+| [Client::getCustomFormat](#ClientgetCustomFormat) | Returns the current formatting function/method. |
 | [Client::sendResponse](#ClientsendResponse) | Sends the actual response. |
 | [Client::getOutputFormatMethod](#ClientgetOutputFormatMethod) | Returns the current output format method |
 | [Client::getOutputFormat](#ClientgetOutputFormat) | Returns the current output format |
@@ -17,7 +19,6 @@
 | [Client::asJSON](#ClientasJSON) | Converts data to pretty JSON. |
 | [Client::asXML](#ClientasXML) | Converts data to XML. |
 | [Client::asText](#ClientasText) | Converts data to text. |
-| [Client::addOutputFormat](#ClientaddOutputFormat) | Add a additional output format. |
 | [Client::setFormat](#ClientsetFormat) | Set the current output format. |
 | [Client::getURL](#ClientgetURL) | Returns the current endpoint URL. |
 | [Client::setURL](#ClientsetURL) | Set the current endpoint URL. |
@@ -29,6 +30,8 @@
 | [Server::create](#Servercreate) | Creates controller factory. User for internal testing. |
 | [Server::setControllerFactory](#ServersetControllerFactory) | Change the current controller factory. |
 | [Server::getControllerFactory](#ServergetControllerFactory) | Return the current controller factory. |
+| [Server::setApiSpec](#ServersetApiSpec) | Change the current controller factory. |
+| [Server::getApiSpec](#ServergetApiSpec) | Return the current controller factory. |
 | [Server::setHttpStatusCodes](#ServersetHttpStatusCodes) | Enable / Disable sending of HTTP status codes. |
 | [Server::getHttpStatusCodes](#ServergetHttpStatusCodes) | Return if HTTP status codes are sent. |
 | [Server::setCheckAccess](#ServersetCheckAccess) | Set the check access function/method. |
@@ -78,7 +81,7 @@
 
 This client handles API responses for a given endpoint.
 
-It can format the response as JSON, XML, or plain text.
+It can format the response as JSON, XML, plain text, of a custom format.
 
 * Full name: \RestService\Client
 
@@ -152,6 +155,50 @@ $pServerController Server controller.
 
 
 ---
+### Client::setCustomFormat
+
+Set the custom formatting function/method.
+
+```php
+Client::setCustomFormat( callable pFn ): \RestService\Client
+```
+
+Called with arguments: (message)
+
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pFn` | **callable** | The custom formatting function/method. |
+
+
+**Return Value:**
+
+$this The client instance.
+
+
+
+---
+### Client::getCustomFormat
+
+Returns the current formatting function/method.
+
+```php
+Client::getCustomFormat(  ): callable
+```
+
+
+
+
+
+**Return Value:**
+
+$customFormat The check access function/method.
+
+
+
+---
 ### Client::sendResponse
 
 Sends the actual response.
@@ -193,12 +240,12 @@ Client::getOutputFormatMethod( string pFormat ): string
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `pFormat` | **string** | The output format. &#039;json&#039;, &#039;xml&#039;, &#039;text&#039; |
+| `pFormat` | **string** | The output format. &#039;json&#039;, &#039;xml&#039;, &#039;text&#039;, or &#039;custom&#039;. |
 
 
 **Return Value:**
 
-'asJSON', 'asXML', or 'asText'
+'asJSON', 'asXML', 'asText', or 'customFormat'.
 
 
 
@@ -217,7 +264,7 @@ Client::getOutputFormat(  ): string
 
 **Return Value:**
 
-'json', 'xml', 'text'
+'json', 'xml', 'text', or 'custom'
 
 
 
@@ -365,32 +412,6 @@ Client::asText( mixed pMessage ): string
 **Return Value:**
 
 JSON version of the original data.
-
-
-
----
-### Client::addOutputFormat
-
-Add a additional output format.
-
-```php
-Client::addOutputFormat( string pCode, string pMethod ): \RestService\Client
-```
-
-
-
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `pCode` | **string** | Name of the format. |
-| `pMethod` | **string** | Method to use to output the format. |
-
-
-**Return Value:**
-
-$this Client instance.
 
 
 
@@ -621,6 +642,51 @@ Server::getControllerFactory(  ): callable
 **Return Value:**
 
 $controllerFactory The controller factory.
+
+
+
+---
+### Server::setApiSpec
+
+Change the current controller factory.
+
+```php
+Server::setApiSpec( string title, string version ): \RestService\Server
+```
+
+
+
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `title` | **string** | The name of the controller. |
+| `version` | **string** | The version of the controller. |
+
+
+**Return Value:**
+
+$this The server instance.
+
+
+
+---
+### Server::getApiSpec
+
+Return the current controller factory.
+
+```php
+Server::getApiSpec(  ): array
+```
+
+
+
+
+
+**Return Value:**
+
+$apiSpec The API specification.
 
 
 

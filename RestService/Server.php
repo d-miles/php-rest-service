@@ -5,7 +5,7 @@ namespace RestService;
 /**
  * This client handles API responses for a given endpoint.
  *
- * It can format the response as JSON, XML, or plain text.
+ * It can format the response as JSON, XML, plain text, of a custom format.
  */
 class Client {
     /**
@@ -16,6 +16,14 @@ class Client {
     private $outputFormat = 'json';
 
     /**
+     * Custom formatting function
+     * Arguments: (message)
+     *
+     * @var callable
+     */
+    protected $customFormat;
+
+    /**
      * List of possible output formats.
      *
      * @var array
@@ -23,7 +31,8 @@ class Client {
     private $outputFormats = array(
         'json' => 'asJSON',
         'xml' => 'asXML',
-        'text' => 'asText'
+        'text' => 'asText',
+        'custom' => 'customFormat'
     );
 
     /**
@@ -133,6 +142,28 @@ class Client {
         return $this->controller;
     }
 
+
+    /**
+     * Set the custom formatting function/method.
+     * Called with arguments: (message)
+     *
+     * @param  callable $pFn The custom formatting function/method.
+     * @return Client   $this The client instance.
+     */
+    public function setCustomFormat($pFn) {
+        $this->customFormat = $pFn;
+
+        return $this;
+    }
+
+    /**
+     * Returns the current formatting function/method.
+     * @return callable $customFormat The check access function/method.
+     */
+    public function getCustomFormat() {
+        return $this->customFormat;
+    }
+
     /**
      * Sends the actual response.
      *
@@ -158,15 +189,27 @@ class Client {
         $pMessage = array_reverse($pMessage, true);
 
         $method = $this->getOutputFormatMethod($this->getOutputFormat());
-        echo $this->$method($pMessage);
+        if ($method == 'customFormat' && $this->customFormat == null) {
+            $method = 'asJSON';
+        } 
+        else if ($method == 'customFormat' && $this->customFormat != null) {
+            $args = array($pMessage);
+            $result = call_user_func_array($this->getCustomFormat(), $args);
+            $this->setContentLength($result);
+
+            echo $result;
+        }
+        else {
+            echo $this->$method($pMessage);
+        }
         exit;
     }
 
     /**
      * Returns the current output format method
      * 
-     * @param  string $pFormat The output format. 'json', 'xml', 'text'
-     * @return string 'asJSON', 'asXML', or 'asText'
+     * @param  string $pFormat The output format. 'json', 'xml', 'text', or 'custom'.
+     * @return string 'asJSON', 'asXML', 'asText', or 'customFormat'.
      */
     public function getOutputFormatMethod($pFormat)
     {
@@ -176,7 +219,7 @@ class Client {
     /**
      * Returns the current output format
      * 
-     * @return string 'json', 'xml', 'text'
+     * @return string 'json', 'xml', 'text', or 'custom'
      */
     public function getOutputFormat()
     {
@@ -355,19 +398,6 @@ class Client {
         $this->setContentLength($text);
 
         return $text;
-    }
-
-    /**
-     * Add a additional output format.
-     *
-     * @param  string $pCode Name of the format.
-     * @param  string $pMethod Method to use to output the format.
-     * @return Client $this Client instance.
-     */
-    public function addOutputFormat($pCode, $pMethod) {
-        $this->outputFormats[$pCode] = $pMethod;
-
-        return $this;
     }
 
     /**
@@ -1818,126 +1848,6 @@ class Server
         return $result;
     }
 
-    /**
-     * Fetches all meta data informations as params, return type etc.
-     *
-     * @param  \ReflectionMethod    $pMethod
-     * @param  array                $pRegMatches
-     * @return array                The meta data.
-     */
-    public function getOpenApiMethodMetaData(\ReflectionFunctionAbstract $pMethod, $pRegMatches = null) {
-        $file = $pMethod->getFileName();
-        $startLine = $pMethod->getStartLine();
-
-        $fh = fopen($file, 'r');
-        if (!$fh) return false;
-
-        $lineNr = 1;
-        $lines = array();
-        while (($buffer = fgets($fh)) !== false) {
-            if ($lineNr == $startLine) break;
-            $lines[$lineNr] = $buffer;
-            $lineNr++;
-        }
-        fclose($fh);
-
-        $phpDoc = '';
-        $blockStarted = false;
-        while ($line = array_pop($lines)) {
-
-            if ($blockStarted) {
-                $phpDoc = $line.$phpDoc;
-
-                //if start comment block: /*
-                if (preg_match('/\s*\t*\/\*/', $line)) {
-                    break;
-                }
-                continue;
-            } else {
-                //we are not in a comment block.
-                //if class def, array def or close bracked from fn comes above
-                //then we dont have phpdoc
-                if (preg_match('/^\s*\t*[a-zA-Z_&\s]*(\$|{|})/', $line)) {
-                    break;
-                }
-            }
-
-            $trimmed = trim($line);
-            if ($trimmed == '') continue;
-
-            //if end comment block: */
-            if (preg_match('/\*\//', $line)) {
-                $phpDoc = $line.$phpDoc;
-                $blockStarted = true;
-                //one line php doc?
-                if (preg_match('/\s*\t*\/\*/', $line)) {
-                    break;
-                }
-            }
-        }
-
-        $phpDoc = $this->parsePhpDoc($phpDoc);
-
-        $refParams = $pMethod->getParameters();
-        $params = array();
-
-        $fillPhpDocParam = !isset($phpDoc['param']);
-
-        foreach ($refParams as $param) {
-            $params[$param->getName()] = $param;
-            if ($fillPhpDocParam) {
-                $phpDoc['param'][] = array(
-                    'name' => $param->getName(),
-                    'type' => $this->declaresArray($param)?'array':'mixed'
-                );
-            }
-        }
-
-        $parameters = array();
-
-        if (isset($phpDoc['param'])) {
-            if (is_array($phpDoc['param']) && is_string(key($phpDoc['param'])))
-                $phpDoc['param'] = array($phpDoc['param']);
-
-            $c = 0;
-            foreach ($phpDoc['param'] as $phpDocParam) {
-                if (isset($params[$phpDocParam['name']]))
-                    $param = $params[$phpDocParam['name']];
-                if (!$param) continue;
-                $parameter = array(
-                    'type' => $phpDocParam['type']
-                );
-
-                if ($pRegMatches && is_array($pRegMatches) && $pRegMatches[$c]) {
-                    $parameter['fromRegex'] = '$'.($c+1);
-                }
-
-                $parameter['required'] = !$param->isOptional();
-
-                if ($param->isDefaultValueAvailable()) {
-                    $parameter['default'] = str_replace(array("\n", ' '), '', var_export($param->getDefaultValue(), true));
-                }
-                $parameters[$this->argumentName($phpDocParam['name'])] = $parameter;
-                $c++;
-            }
-        }
-
-        if (!isset($phpDoc['return']))
-            $phpDoc['return'] = array('type' => 'mixed');
-
-        $result = array(
-            'parameters' => $parameters,
-            'return' => $phpDoc['return']
-        );
-
-        if (isset($phpDoc['description']))
-            $result['description'] = $phpDoc['description'];
-
-        if (isset($phpDoc['url']))
-            $result['url'] = $phpDoc['url'];
-
-        return $result;
-    }
 
     /**
      * Parse phpDoc string and returns an array of attributes.
