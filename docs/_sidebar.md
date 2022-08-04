@@ -1,7 +1,9 @@
 * [Overview](/#PHP-REST-Service)
 
   * [Features](/#features)
+  * [About](/#about)
   * [Installation](/#installation)
+    * [Requirements](/#requirements)
     * [Composer](/#composer)
     * [Manual](/#manual)
   * [Web Server Configuration](/#web-server-configuration)

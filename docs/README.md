@@ -23,9 +23,29 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 + Support of `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD` and `OPTIONS`
 + Suppress the HTTP status code with `?_suppress_status_code=1` (for clients that have troubles with that)
 + Supports `?_method=<httpMethod>` as addition to the actual HTTP method.
++ Supports custom error handling, logging, access control and response formatting functions.
 + With auto-generation through PHP's `reflection`
 
+## About
+
+PHP REST Service is a lightweight API framework for PHP. It is very easy to learn, use, and integrate with existing PHP projects. 
+
+This package is a fork of marcj/php-rest-service with the following changes:
+* Support for PHP 7.4+
+* Support for plain text responses
+* Support for custom response formats
+* Support for pre-response control functions
+* Automatic OpenAPI specification generation
+* Single file structure
+* Complete documentation and examples
+
+Why build a new package? I wanted an express-like API router for PHP but couldn't find anything that fit my needs. marcj/php-rest-service is a great framework but it's deprecated and missing modern PHP support, documentation, and features that I needed.
+
 ## Installation
+
+### Requirements
+
+PHP REST Service requires PHP 7.4+. There are no dependecies.
 
 ### Composer
 
@@ -315,6 +335,8 @@ Server::create('test')
 
 This will generate an OpenAPI specification in JSON format, accessible at the `/spec` GET endpoint of your API.
 
+!> Note: If there is another endpoint named `/spec`, it will take priority over the OpenAPI specification.
+
 Request and response types and descriptions will be pulled from the comment blocks of your endpoint functions.
 If no comment annotations are detected, the request / respone types will default to `AnyValue`.
 
@@ -328,9 +350,6 @@ For example, say you already have an endpoint at `/foo/(\d+)` and you want to ad
  * @openapiurl /foo/{var1}/{var2}
  */
 ```
-
-!> Note: If there is another endpoint named `/spec`, it will take priority over the OpenAPI specification.
-
 
 ## Responses
 

@@ -23,6 +23,7 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 + Can return a summary of all routes or one route through `OPTIONS` method based on PHPDoc (if `OPTIONS` is not overridden)
 + Support of `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD` and `OPTIONS`
 + Suppress the HTTP status code with ?_suppress_status_code=1 (for clients that have troubles with that)
++ Supports custom error handling, logging, access control and response formatting functions.
 + Supports ?_method=`httpMethod` as addition to the actual HTTP method.
 + With auto-generation through PHP's `reflection`
 
