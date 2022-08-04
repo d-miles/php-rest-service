@@ -1339,192 +1339,215 @@ class Server
                         array_shift($matches);
                     }
                     $path = '/'.$routeUri;
-                    $finalPath = '/'.$routeUri;
+                    $overridePath = null;
                     $def = array();
     
-                        foreach ($routeMethods as $method => $phpMethod) {        
-                            if (is_string($phpMethod)) {
-                                $ref = new \ReflectionClass($this->controller);
-                                $refMethod = $ref->getMethod($phpMethod);
-                            } else {
-                                $refMethod = new \ReflectionFunction($phpMethod);
-                            }
-                            $metadata = $this->getMethodMetaData($refMethod);
-                            preg_match_all('~ \( (?: [^()]+ | (?R) )*+ \) ~x', $routeUri, $paramMatches);
+                    foreach ($routeMethods as $method => $phpMethod) {        
+                        if (is_string($phpMethod)) {
+                            $ref = new \ReflectionClass($this->controller);
+                            $refMethod = $ref->getMethod($phpMethod);
+                        } else {
+                            $refMethod = new \ReflectionFunction($phpMethod);
+                        }
+                        $metadata = $this->getMethodMetaData($refMethod);
+
+                        if (isset($metadata['openapiurl']) && $overridePath == null) {
+                            $finalPath = $metadata['openapiurl'];
+                        }
+                        else {
+                            preg_match_all('~ \( (?: [^()]+ | (?R) )*+ \) ~x', $path, $paramMatches);
                             $place = 0;
 
-                                if (isset($paramMatches[0]) && count($paramMatches[0]) > 0) {
-                                    foreach ($paramMatches[0] as $match) {
-                                        $param = array_keys($metadata['parameters'])[$place];
-                                        $replace = "{".$param."}";
-                                        if (($pos = strpos($path, $match)) !== false) {
-                                            if(substr($match, 0, 2) === "(!" || substr($match, 0, 3) === "(?!") {
-                                                $path = substr_replace($path, '', $pos, strlen($match));
-                                            }
-                                            else {
-                                                $finalPath = substr_replace($path, $replace, $pos, strlen($match));
-                                                $metadata['parameters'][$param] = array_merge($metadata['parameters'][$param], array('in' => 'path'));
-                                                $place++;
-                                            }
+                            if (isset($paramMatches[0]) && count($paramMatches[0]) > 0) {
+                                foreach ($paramMatches[0] as $match) {
+                                    $param = array_keys($metadata['parameters'])[$place];
+                                    $replace = "{".$param."}";
+                                    if (($pos = strpos($path, $match)) !== false) {
+                                        if(substr($match, 0, 2) !== "(!" && substr($match, 0, 3) !== "(?!"  && substr($match, 0, 3) !== "(?:") {
+                                            $path = substr_replace($path, $replace, $pos, strlen($match));
+                                            $metadata['parameters'][$param] = array_merge($metadata['parameters'][$param], array('in' => 'path'));
+                                            $place++;
                                         }
                                     }
                                 }
-                        
-                            switch ($metadata['return']['type']) {
+                            }
+
+                            $finalPath = $path;
+
+                            preg_match_all('~ \( (?: [^()]+ | (?R) )*+ \) ~x', $finalPath, $paramMatches);
+                            $place = 0;
+
+                            if (isset($paramMatches[0]) && count($paramMatches[0]) > 0) {
+                                foreach ($paramMatches[0] as $match) {
+                                    $param = array_keys($metadata['parameters'])[$place];
+                                    if (($pos = strpos($finalPath, $match)) !== false) {
+                                        if(substr($match, 0, 2) === "(!" || substr($match, 0, 3) === "(?!" || substr($match, 0, 3) === "(?:") {
+                                            $finalPath = substr_replace($finalPath, '', $pos, strlen($match));
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    
+                        switch ($metadata['return']['type']) {
+                            case "int":
+                                $type = array("type" =>  "integer");
+                                break;
+                            case "integer":
+                                $type = array("type" =>  "integer");
+                                break;
+                            case "bool":
+                                $type = array("type" =>  "boolean");
+                                break;
+                            case "boolean":
+                                $type = array("type" =>  "boolean");
+                                break;
+                            case "string":
+                                $type = array("type" =>  "string");
+                                break;
+                            case "number":
+                                $type = array("type" =>  "number");
+                                break;
+                            case "array":
+                                $type = array("type" =>  "array", "items" => (object) null);
+                                break;
+                            case "object":
+                                $type = array("type" =>  "object");
+                                break;
+                            default:
+                                $type = array("\$ref" => "#/components/schemas/AnyValue");
+                        }
+                        $parameters = array();
+                        foreach ($metadata['parameters'] as $name => $parameter) {
+                            switch ($parameter['type']) {
                                 case "int":
-                                    $type = array("type" =>  "integer");
+                                    $paramType = array("type" =>  "integer");
                                     break;
                                 case "integer":
-                                    $type = array("type" =>  "integer");
+                                    $paramType = array("type" =>  "integer");
                                     break;
                                 case "bool":
-                                    $type = array("type" =>  "boolean");
+                                    $paramType = array("type" =>  "boolean");
                                     break;
                                 case "boolean":
-                                    $type = array("type" =>  "boolean");
+                                    $paramType = array("type" =>  "boolean");
                                     break;
                                 case "string":
-                                    $type = array("type" =>  "string");
+                                    $paramType = array("type" =>  "string");
                                     break;
                                 case "number":
-                                    $type = array("type" =>  "number");
+                                    $paramType = array("type" =>  "number");
                                     break;
                                 case "array":
-                                    $type = array("type" =>  "array", "items" => (object) null);
+                                    $paramType = array("type" =>  "array", "items" => (object) null);
                                     break;
                                 case "object":
-                                    $type = array("type" =>  "object");
+                                    $paramType = array("type" =>  "object");
                                     break;
                                 default:
-                                    $type = array("\$ref" => "#/components/schemas/AnyValue");
+                                    $paramType = array("\$ref" => "#/components/schemas/AnyValue");
                             }
-                            $parameters = array();
-                            foreach ($metadata['parameters'] as $name => $parameter) {
-                                switch ($parameter['type']) {
-                                    case "int":
-                                        $paramType = array("type" =>  "integer");
-                                        break;
-                                    case "integer":
-                                        $paramType = array("type" =>  "integer");
-                                        break;
-                                    case "bool":
-                                        $paramType = array("type" =>  "boolean");
-                                        break;
-                                    case "boolean":
-                                        $paramType = array("type" =>  "boolean");
-                                        break;
-                                    case "string":
-                                        $paramType = array("type" =>  "string");
-                                        break;
-                                    case "number":
-                                        $paramType = array("type" =>  "number");
-                                        break;
-                                    case "array":
-                                        $paramType = array("type" =>  "array", "items" => (object) null);
-                                        break;
-                                    case "object":
-                                        $paramType = array("type" =>  "object");
-                                        break;
-                                    default:
-                                        $paramType = array("\$ref" => "#/components/schemas/AnyValue");
+                            $body = array();
+                            if (isset($parameter['in']) && $parameter['in'] == 'path') {
+                                $parameters[] = array(
+                                    "in" => "path",
+                                    "name" => $name, 
+                                    "required" => true,
+                                    "schema" => $paramType
+                                );
+                                if (isset($parameter['description']) && $parameter['description'] != null) {
+                                    $parameters['description'] = $parameter['description'];
                                 }
-                                $body = array();
-                                if (isset($parameter['in']) && $parameter['in'] == 'path') {
-                                    $parameters[] = array(
-                                        "in" => "path",
-                                        "name" => $name, 
-                                        "required" => true,
-                                        "schema" => $paramType
-                                    );
-                                    if (isset($parameter['description']) && $parameter['description'] != null) {
-                                        $parameters['description'] = $parameter['description'];
-                                    }
-                                } else if ($method == 'get' || $method == 'delete') {
-                                    $parameters[] = array(
-                                        "in" => "query",
-                                        "name" => $name, 
-                                        "required" => (isset($parameter['required'])) ? $parameter['required'] : false,
-                                        "schema" => $paramType
-                                    );
-                                    if (isset($parameter['description']) && $parameter['description'] != null) {
-                                        $parameters['description'] = $parameter['description'];
-                                    }
-                                } else {
-                                    $body[] = array(
-                                        "name" => $name,
-                                        "in" => "body",
-                                        "required" => (isset($parameter['required'])) ? $parameter['required'] : false,
-                                        "schema" => $paramType
-                                    );
-                                    if (isset($parameter['description']) && $parameter['description'] != null) {
-                                        $body['description'] = $parameter['description'];
-                                    }
+                            } else if ($method == 'get' || $method == 'delete') {
+                                $parameters[] = array(
+                                    "in" => "query",
+                                    "name" => $name, 
+                                    "required" => (isset($parameter['required'])) ? $parameter['required'] : false,
+                                    "schema" => $paramType
+                                );
+                                if (isset($parameter['description']) && $parameter['description'] != null) {
+                                    $parameters['description'] = $parameter['description'];
+                                }
+                            } else {
+                                $body[] = array(
+                                    "name" => $name,
+                                    "in" => "body",
+                                    "required" => (isset($parameter['required'])) ? $parameter['required'] : false,
+                                    "schema" => $paramType
+                                );
+                                if (isset($parameter['description']) && $parameter['description'] != null) {
+                                    $body['description'] = $parameter['description'];
                                 }
                             }
-                            switch ($format) {
-                                case "json":
-                                    $outputFormat = "application/json";
-                                    break;
-                                case "xml":
-                                    $outputFormat = "application/xml";
-                                    break;
-                                case "text":
-                                    $outputFormat = "text/plain";
-                                    break;
-                                default:
-                                    $outputFormat = "application/json";
-                            }
-                            $def[$method] = array(
-                                "parameters" => $parameters,
-                                "responses" => array(
-                                    "200" => array(
-                                        "description" => "Successful operation",
-                                        "content" => array(
-                                            $outputFormat => array(
-                                                "schema" => array(
-                                                    "type" => "object",
-                                                    "properties" => array(
-                                                        "status" => array(
-                                                            "type" => "integer",
-                                                        ),
-                                                        "data" => $type,
-                                                    )
-                                                )
+                        }
+                        switch ($format) {
+                            case "json":
+                                $outputFormat = "application/json";
+                                break;
+                            case "xml":
+                                $outputFormat = "application/xml";
+                                break;
+                            case "text":
+                                $outputFormat = "text/plain";
+                                break;
+                            default:
+                                $outputFormat = "application/json";
+                        }
+                        $def[$method] = array(
+                            "parameters" => $parameters,
+                            "responses" => array(
+                                "200" => array(
+                                    "description" => "Successful operation",
+                                    "content" => array(
+                                        $outputFormat => array(
+                                            "schema" => array(
+                                                "type" => "object",
+                                                "properties" => array(
+                                                    "status" => array(
+                                                        "type" => "integer",
+                                                    ),
+                                                    "data" => $type,
                                                 )
                                             )
-                                        ),
-                                    "500" => array(
-                                        "description" => "Internal Server Error",
-                                        "content" => array(
-                                            $outputFormat => array(
-                                                "schema" => array(
-                                                    "\$ref" => "#/components/schemas/500"
-                                                )
+                                            )
+                                        )
+                                    ),
+                                "500" => array(
+                                    "description" => "Internal Server Error",
+                                    "content" => array(
+                                        $outputFormat => array(
+                                            "schema" => array(
+                                                "\$ref" => "#/components/schemas/500"
                                             )
                                         )
                                     )
                                 )
-                            );
-                            if ($method != 'get' && $method != 'delete') {
-                                $requiredParams = array();
-                                $properties = array();
-                                $bodyRequired = false;
-                                foreach ($body as $b) {
-                                    if ($b['required']) {
-                                        $bodyRequired = true;
-                                        $requiredParams[] = $b['name'];
-                                    }
-                                    $properties[$b['name']] =  $b['schema'];
+                            )
+                        );
+                        if ($method != 'get' && $method != 'delete') {
+                            $requiredParams = array();
+                            $properties = array();
+                            $bodyRequired = false;
+                            foreach ($body as $b) {
+                                if ($b['required']) {
+                                    $bodyRequired = true;
+                                    $requiredParams[] = $b['name'];
                                 }
-                                if ($bodyRequired) {
-                                    $def[$method]['requestBody']['required'] = true;
-                                }
-                                $def[$method]['requestBody']['content'] = array(
-                                    "application/json" => array("schema" => array("type" => "object", "properties" => $properties)),
-                                    "application/x-www-form-urlencoded" => array("schema" => array("type" => "object", "properties" => $properties))
-                                );
+                                $properties[$b['name']] =  $b['schema'];
                             }
+                            if ($bodyRequired) {
+                                $def[$method]['requestBody']['required'] = true;
+                            }
+                            $def[$method]['requestBody']['content'] = array(
+                                "application/json" => array("schema" => array("type" => "object", "properties" => $properties)),
+                                "application/x-www-form-urlencoded" => array("schema" => array("type" => "object", "properties" => $properties))
+                            );
                         }
+                    }
+                    if ($overridePath != null)
+                        $finalPath = $overridePath;
+                        
                     $routes[$finalPath] = $def;
                 }
             }
@@ -1804,6 +1827,8 @@ class Server
 
         $parameters = array();
 
+        // echo json_encode($phpDoc);
+
         if (isset($phpDoc['param'])) {
             if (is_array($phpDoc['param']) && is_string(key($phpDoc['param'])))
                 $phpDoc['param'] = array($phpDoc['param']);
@@ -1844,6 +1869,9 @@ class Server
 
         if (isset($phpDoc['url']))
             $result['url'] = $phpDoc['url'];
+
+        if (isset($phpDoc['openapiurl']))
+            $result['openapiurl'] = ltrim($phpDoc['openapiurl'], '@openapiurl ');
 
         return $result;
     }

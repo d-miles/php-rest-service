@@ -318,6 +318,16 @@ This will generate an OpenAPI specification in JSON format, accessible at the `/
 Request and response types and descriptions will be pulled from the comment blocks of your endpoint functions.
 If no comment annotations are detected, the request / respone types will default to `AnyValue`.
 
+If your URL contains regex, REST API Service will attempt to scan your string and replace any regex capture groups with the corresponding argument name, and delete any non-capture groups, however, it is unable to process regex commands outside of capture groups. In order to specify the correct URL that will be used in the specification, you can provide the `@openapiurl` annotation on your endpoint function.
+
+For example, say you already have an endpoint at `/foo/(\d+)` and you want to add an endpoint at `/foo/\d+/(\w+)`. While you could rewrite this to use non-capture groups like `/foo/(?:\d+)/(\w+)`, you can also add the following annotation to the endpoint function:
+
+```php
+/**
+ * @url /foo/\d+/(\w+)
+ * @openapiurl /foo/{var1}/{var2}
+ */
+```
 
 !> Note: If there is another endpoint named `/spec`, it will take priority over the OpenAPI specification.
 
