@@ -1345,10 +1345,11 @@ class Server
                     array_shift($matches);
                 }
                 $path = $url . '/'.$routeUri;
+                $originalPath = $path;
                 $overridePath = null;
                 $def = array();
 
-                foreach ($routeMethods as $method => $phpMethod) {        
+                foreach ($routeMethods as $method => $phpMethod) {
                     if (is_string($phpMethod)) {
                         $ref = new \ReflectionClass($this->controller);
                         $refMethod = $ref->getMethod($phpMethod);
@@ -1361,16 +1362,16 @@ class Server
                         $finalPath = $metadata['openapiurl'];
                     }
                     else {
-                        preg_match_all('~ \( (?: [^()]+ | (?R) )*+ \) ~x', $path, $paramMatches);
+                        preg_match_all('~ \( (?: [^()]+ | (?R) )*+ \) ~x', $originalPath, $paramMatches);
                         $place = 0;
 
                         if (isset($paramMatches[0]) && count($paramMatches[0]) > 0) {
                             foreach ($paramMatches[0] as $match) {
                                 $param = array_keys($metadata['parameters'])[$place];
                                 $replace = "{".$param."}";
-                                if (($pos = strpos($path, $match)) !== false) {
+                                if (($pos = strpos($originalPath, $match)) !== false) {
                                     if(substr($match, 0, 2) !== "(!" && substr($match, 0, 3) !== "(?!"  && substr($match, 0, 3) !== "(?:") {
-                                        $path = substr_replace($path, $replace, $pos, strlen($match));
+                                        $path = substr_replace($originalPath, $replace, $pos, strlen($match));
                                         $metadata['parameters'][$param] = array_merge($metadata['parameters'][$param], array('in' => 'path'));
                                         $place++;
                                     }
@@ -1395,12 +1396,13 @@ class Server
                         }
 
                     }
-                
+
                     $type = $this->convertType($metadata['return']['type']);
                     $parameters = array();
+                    $body = array();
                     foreach ($metadata['parameters'] as $name => $parameter) {
                         $paramType = $this->convertType($parameter['type']);
-                        $body = array();
+                        
                         if (isset($parameter['in']) && $parameter['in'] == 'path') {
                             $parameters[] = array(
                                 "in" => "path",
@@ -1864,8 +1866,6 @@ class Server
         }
 
         $parameters = array();
-
-        // echo json_encode($phpDoc);
 
         if (isset($phpDoc['param'])) {
             if (is_array($phpDoc['param']) && is_string(key($phpDoc['param'])))
