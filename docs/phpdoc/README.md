@@ -30,7 +30,7 @@
 | [Server::create](#Servercreate) | Creates controller factory. User for internal testing. |
 | [Server::setControllerFactory](#ServersetControllerFactory) | Change the current controller factory. |
 | [Server::getControllerFactory](#ServergetControllerFactory) | Return the current controller factory. |
-| [Server::setApiSpec](#ServersetApiSpec) | Change the current controller factory. |
+| [Server::setApiSpec](#ServersetApiSpec) | Enable and set parameters for OpenAPI specification generateion. |
 | [Server::getApiSpec](#ServergetApiSpec) | Return the current controller factory. |
 | [Server::setHttpStatusCodes](#ServersetHttpStatusCodes) | Enable / Disable sending of HTTP status codes. |
 | [Server::getHttpStatusCodes](#ServergetHttpStatusCodes) | Return if HTTP status codes are sent. |
@@ -69,6 +69,7 @@
 | [Server::camelCase2Dashes](#ServercamelCase2Dashes) | Convert string from camel case to dashes. |
 | [Server::collectRoutes](#ServercollectRoutes) | Automatically collect routes from class. |
 | [Server::simulateCall](#ServersimulateCall) | Simulates a HTTP Call. |
+| [Server::generateOpenApiRoutes](#ServergenerateOpenApiRoutes) | Generate route array for OpenAPI specification from current controller and URL. |
 | [Server::run](#Serverrun) | Fire the magic! |
 | [Server::fireMethod](#ServerfireMethod) | Fire a method. |
 | [Server::describe](#Serverdescribe) | Describe a route or the whole controller with all routes. |
@@ -648,10 +649,10 @@ $controllerFactory The controller factory.
 ---
 ### Server::setApiSpec
 
-Change the current controller factory.
+Enable and set parameters for OpenAPI specification generateion.
 
 ```php
-Server::setApiSpec( string title, string version ): \RestService\Server
+Server::setApiSpec( string title, string version, mixed description = null, string server = null, bool recurse = true ): \RestService\Server
 ```
 
 
@@ -663,6 +664,9 @@ Server::setApiSpec( string title, string version ): \RestService\Server
 |-----------|------|-------------|
 | `title` | **string** | The name of the controller. |
 | `version` | **string** | The version of the controller. |
+| `description` | **mixed** |  |
+| `server` | **string** | The address of the server. Default is null. |
+| `recurse` | **bool** | Whether or not to recurse into the child controllers. Default is true. |
 
 
 **Return Value:**
@@ -1561,6 +1565,31 @@ Server::simulateCall( string pUri, string pMethod = 'get' ): string
 **Return Value:**
 
 The response.
+
+
+
+---
+### Server::generateOpenApiRoutes
+
+Generate route array for OpenAPI specification from current controller and URL.
+
+```php
+Server::generateOpenApiRoutes( string url ): array
+```
+
+
+
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `url` | **string** | The trigger URL for the current contorller. |
+
+
+**Return Value:**
+
+The generated route array.
 
 
 

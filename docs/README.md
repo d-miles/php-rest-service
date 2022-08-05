@@ -321,19 +321,19 @@ Server::create('test')
 
 ### OpenAPI Specification
 
-PHP REST Service can automatically generate an OpenAPI specification file for your API. Currently you must generate a seperate specification for each controller. In the future, parent controllers will be able to include child controller endpoints in the specification.
+PHP REST Service can automatically generate an OpenAPI specification file for your API.
 
-To enable OpenAPI generation, simply use the [`setApiSpec()`](phpdoc/#serversetapispec) method on the desired controller, passing the name and version of your API.
+To enable OpenAPI generation, simply use the [`setApiSpec()`](phpdoc/#serversetapispec) method on the desired controller, passing the name, version, description (optional), base path (optional), and whether or not to include child controllers (optional).
 
 ```php
 Server::create('test')
-    -->setApiSpec("My New API", "1.2.3")
+    -->setApiSpec("My New API", "1.2.3", "This is my new API", "https://example.com/api", true)
     ->addGetRoute('', function($test) {
         return "Hello ". $test;
     })
 ```
 
-This will generate an OpenAPI specification in JSON format, accessible at the `/spec` GET endpoint of your API.
+This will generate an OpenAPI specification in JSON format, accessible at the `/spec` GET endpoint of your API, including all endpoints in child controllers.
 
 !> Note: If there is another endpoint named `/spec`, it will take priority over the OpenAPI specification.
 

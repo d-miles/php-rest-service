@@ -92,6 +92,7 @@
     * [camelCase2Dashes](phpdoc/#servercamelcase2dashes)
     * [collectRoutes](phpdoc/#servercollectroutes)
     * [simulateCall](phpdoc/#serversimulatecall)
+    * [generateOpenApiRoutes](phpdoc/#servergenerateopenapiroutes)
     * [run](phpdoc/#serverrun)
     * [fireMethod](phpdoc/#serverfiremethod)
     * [describe](phpdoc/#serverdescribe)
