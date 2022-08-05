@@ -4,10 +4,10 @@
 
 PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
-![Build Status](https://img.shields.io/circleci/build/github/cdgco/php-rest-service?style=flat-square)
-![PHP Version](https://img.shields.io/packagist/php-v/cdgco/php-rest-service?style=flat-square)
-![Package Version](https://img.shields.io/packagist/v/cdgco/php-rest-service?style=flat-square)
-![License](https://img.shields.io/github/license/cdgco/php-rest-service?style=flat-square)
+[![Build Status](https://img.shields.io/circleci/build/github/cdgco/php-rest-service?style=flat-square)](https://app.circleci.com/pipelines/github/cdgco/php-rest-service)
+[![PHP Version](https://img.shields.io/packagist/php-v/cdgco/php-rest-service?style=flat-square)](https://www.php.net/downloads)
+[![Package Version](https://img.shields.io/packagist/v/cdgco/php-rest-service?style=flat-square)](https://packagist.org/packages/cdgco/php-rest-service)
+[![License](https://img.shields.io/github/license/cdgco/php-rest-service?style=flat-square)](https://github.com/cdgco/php-rest-service/blob/master/LICENSE)
 
 [https://cdgco.github.io/php-rest-service](https://cdgco.github.io/php-rest-service)
 </div>
