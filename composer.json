@@ -1,7 +1,7 @@
 {
     "name": "cdgco/php-rest-service",
-    "description": "PHPRestService is a simple and fast PHP class for server side RESTful APIs.",
-    "keywords": ["REST", "RESTful", "php", "API"],
+    "description": "PHP REST Service is a simple and fast PHP class for server side RESTful APIs.",
+    "keywords": ["REST", "RESTful", "php", "API", "REST-API"],
     "license": "MIT",
     "authors": [{
         "name": "Carter Roeser",
