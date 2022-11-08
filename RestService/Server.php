@@ -171,7 +171,7 @@ class Client {
      * @param $pMessage The data to return.
      * @return void
      */
-    public function sendResponse($pMessage, $pHttpCode = '200')
+    public function sendResponse($pMessage, $pHttpCode = '200', $unescape = 0)
     {
         $suppressStatusCode = isset($_GET['_suppress_status_code']) ? $_GET['_suppress_status_code'] : false;
         if ($this->controller->getHttpStatusCodes() &&
@@ -190,7 +190,7 @@ class Client {
 
         $method = $this->getOutputFormatMethod($this->getOutputFormat());
         if ($method == 'customFormat' && $this->customFormat == null) {
-            $method = 'asJSON';
+            echo $this->asJSON($pMessage, $unescape);
         } 
         else if ($method == 'customFormat' && $this->customFormat != null) {
             $args = array($pMessage);
@@ -200,7 +200,12 @@ class Client {
             echo $result;
         }
         else {
-            echo $this->$method($pMessage);
+            if ($method == "asJSON" || $method == "json") {
+                echo $this->asJSON($pMessage, $unescape);
+            }
+            else {
+                echo $this->$method($pMessage);
+            }
         }
         exit;
     }
@@ -283,12 +288,19 @@ class Client {
      * @param mixed $pMessage The data to convert.
      * @return string JSON version of the original data.
      */
-    public function asJSON($pMessage) {
+    public function asJSON($pMessage, $unescape = 0) {
         if (php_sapi_name() !== 'cli' )
             header('Content-Type: application/json; charset=utf-8');
         
-        if (!is_string($pMessage)) $json = json_encode($pMessage);
-        else $json = $pMessage;
+
+        if ($unescape == 1) {
+            if (!is_string($pMessage)) $json = json_encode($pMessage, JSON_UNESCAPED_SLASHES);
+            else $json = $pMessage;
+        }
+        else {
+            if (!is_string($pMessage)) $json = json_encode($pMessage);
+            else $json = $pMessage;
+        }
 
         $result      = '';
         $pos         = 0;
@@ -482,7 +494,7 @@ class InternalClient extends Client {
      * @param string $pHttpCode The HTTP code to process.
      * @return string HTTP method of current request.
      */
-    public function sendResponse($pMessage, $pHttpCode = '200') {
+    public function sendResponse($pMessage, $pHttpCode = '200', $unescape = 0) {
         $pMessage = array_reverse($pMessage, true);
         $pMessage['status'] = $pHttpCode+0;
         $pMessage = array_reverse($pMessage, true);
@@ -1248,8 +1260,8 @@ class Server
      * @param $pData The data to send.
      * @return void
      */
-    public function send($pData) {
-        return $this->getClient()->sendResponse(array('data' => $pData), 200);
+    public function send($pData, $unescape = 0) {
+        return $this->getClient()->sendResponse(array('data' => $pData), 200, $unescape);
     }
 
     /**
@@ -1299,6 +1311,9 @@ class Server
                 $this->routes[$uri][$httpMethod] = $method;
             }
 
+            if (isset($phpDocs['unescape'])) {
+                $this->unescape = $phpDocs['unescape'];
+            }
         }
 
         return $this;
@@ -1710,6 +1725,18 @@ class Server
      * @return mixed            The response.
      */
     public function fireMethod($pMethod, $pController, $pArguments) {
+
+        $ref = new \ReflectionClass($this->controller);
+        $refMethod = $ref->getMethod($pMethod);
+        $metadata = $this->getMethodMetaData($refMethod);
+
+        if (isset($metadata['unescape'])) {
+            $unescape = $metadata['unescape'];
+        }
+        else {
+            $unescape = 0;
+        }
+
         $callable = false;
 
         if ($pController && is_string($pMethod)) {
@@ -1724,7 +1751,7 @@ class Server
 
         if ($callable) {
             try {
-                return $this->send(call_user_func_array($callable, $pArguments));
+                return $this->send(call_user_func_array($callable, $pArguments), $unescape);
             } catch (\Exception $e) {
                 return $this->sendException($e);
             }
@@ -1911,6 +1938,15 @@ class Server
         if (isset($phpDoc['openapiurl']))
             $result['openapiurl'] = ltrim($phpDoc['openapiurl'], '@openapiurl ');
 
+        if (isset($phpDoc['unescape'])) {
+            if ($phpDoc['unescape']['unescape'] == "true") {
+                $result['unescape'] = 1;
+            }
+            else {
+                $result['unescape'] = 0;
+            }
+        }
+        
         return $result;
     }
 
@@ -1963,6 +1999,7 @@ class Server
             'param' => array('/^@param\s*\t*([a-zA-Z_\\\[\]]*)\s*\t*\$([a-zA-Z_]*)\s*\t*(.*)/', array('type', 'name', 'description')),
             'url' => array('/^@url\s*\t*(.+)/', array('url')),
             'return' => array('/^@return\s*\t*([a-zA-Z_\\\[\]]*)\s*\t*(.*)/', array('type', 'description')),
+            'unescape' => array('/^@unescape\s*\t*(.+)/', array('unescape')),
         );
         foreach ($tags as $tag => &$data) {
             if ($tag == 'description') continue;
