@@ -1725,16 +1725,18 @@ class Server
      * @return mixed            The response.
      */
     public function fireMethod($pMethod, $pController, $pArguments) {
-
-        $ref = new \ReflectionClass($this->controller);
-        $refMethod = $ref->getMethod($pMethod);
+        $unescape = 0;
+        
+        if (is_string($pMethod)) {
+            $ref = new \ReflectionClass($this->controller);
+            $refMethod = $ref->getMethod($pMethod);
+        } else {
+            $refMethod = new \ReflectionFunction($pMethod);
+        }
         $metadata = $this->getMethodMetaData($refMethod);
 
         if (isset($metadata['unescape'])) {
             $unescape = $metadata['unescape'];
-        }
-        else {
-            $unescape = 0;
         }
 
         $callable = false;
