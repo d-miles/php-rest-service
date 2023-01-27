@@ -47,7 +47,7 @@ Server::create('/')
   ->addPostRoute('foo', function($field1) {
     return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
   })
-  >addGetRoute('use/this/name', function(){
+  ->addGetRoute('use/this/name', function(){
       return 'Hi there';
   })
 ->run();
@@ -62,9 +62,9 @@ namespace MyRestApi;
 use RestService\Server;
 
 class Admin {
-    /*
-    * @url /test/(\d+)
-    */
+  /*
+   * @url /test/(\d+)
+   */
   public function getTest($param) {
     return 'Yay!' . $param; // $param pulled from URL capture group
   }
@@ -72,8 +72,8 @@ class Admin {
     return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
   }
   /*
-    * @url /use/this/name
-    */
+   * @url /use/this/name
+   */
   public function getNotThisName($field1){
     return 'Hi there';
   }
