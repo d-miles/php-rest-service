@@ -29,7 +29,7 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
 
 ## Requirements
-* PHP 7.4+
+* PHP 7.4+ (Tested on PHP 7.4 - 8.2)
 ## Installation
 `php composer require cdgco/php-rest-service`
 
