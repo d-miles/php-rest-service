@@ -17,3 +17,5 @@ workflows:
           version: '8.0'
       - php/test:
           version: '8.1'
+      - php/test:
+          version: '8.2'
