@@ -1673,6 +1673,7 @@ class Server
         foreach ($params as $param) {
             $name = $this->argumentName($param->getName());
 
+            // If argument is _ (underscore), pass all arguments
             if ($name == '_') {
                 $thisArgs = array();
                 foreach ($_GET as $k => $v) {
@@ -1680,12 +1681,22 @@ class Server
                         $thisArgs[$k] = $v;
                 }
                 $arguments[] = $thisArgs;
-            } else {
+            } 
+            // Else, pass the named argument
+            else {
+
+                // Get PUT data (also supports JSON encoded POST data)
                 $_PUT = null;
+
                 if (isset($_SERVER['REQUEST_METHOD'])) {
                     $method = $_SERVER['REQUEST_METHOD'];
-                    if ('PUT' === $method) {
-                        parse_str(file_get_contents('php://input'), $_PUT);
+                    if ('PUT' === $method || 'POST' === $method) {
+                        try {  
+                            $_PUT = json_decode(file_get_contents("php://input"), true, 512, JSON_THROW_ON_ERROR);
+                        }  
+                        catch (\JsonException $exception) {  
+                            parse_str(file_get_contents('php://input'), $_PUT);
+                        }
                     }
                 }
 
