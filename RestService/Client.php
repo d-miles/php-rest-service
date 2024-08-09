@@ -4,65 +4,65 @@ namespace RestService;
 
 /**
  * This client handles API responses for a given endpoint.
- *
- * It can format the response as JSON, XML, plain text, of a custom format.
+ * 
+ * It can format the response as JSON, XML, plain text, or a custom format.
  */
 class Client {
     /**
      * Current output format.
-     *
+     * 
      * @var string
      */
     private $outputFormat = 'json';
 
     /**
      * Custom formatting function
-     * Arguments: (message)
-     *
+     * 
+     * Arguments: (string message)
+     * 
      * @var callable
      */
     protected $customFormat;
 
     /**
      * List of possible output formats.
-     *
+     * 
      * @var array
      */
-    private $outputFormats = array(
-        'json' => 'asJSON',
-        'xml' => 'asXML',
-        'text' => 'asText',
+    private $outputFormats = [
+        'json'  => 'asJSON',
+        'xml'   => 'asXML',
+        'text'  => 'asText',
         'custom' => 'customFormat'
-    );
+    ];
 
     /**
      * List of possible methods.
      * @var array
      */
-    public $methods = array('get', 'post', 'put', 'delete', 'head', 'options', 'patch');
+    public $methods = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch'];
 
     /**
      * Current URL.
-     *
+     * 
      * @var string
      */
     private $url;
 
     /**
      * @var Server
-     *
+     * 
      */
     private $controller;
 
     /**
      * Custom set http method.
-     *
+     * 
      * @var string
      */
     private $method;
 
-
-    private static $statusCodes = array(
+    private static $statusCodes = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         200 => 'OK',
@@ -104,7 +104,7 @@ class Client {
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
         509 => 'Bandwidth Limit Exceeded'
-    );
+    ];
 
     /**
      * Create a new client.
@@ -135,20 +135,18 @@ class Client {
     /**
      * Return the currently attached controller.
      * 
-     * @return Server $pServerController Server controller.
+     * @return Server Server controller.
      */
     public function getController()
     {
         return $this->controller;
     }
 
-
     /**
      * Set the custom formatting function/method.
-     * Called with arguments: (message)
-     *
-     * @param  callable $pFn The custom formatting function/method.
-     * @return Client   $this The client instance.
+     * 
+     * @param  callable $pFn    The custom formatting function/method. Arguments: (string $message)
+     * @return Client           The client instance.
      */
     public function setCustomFormat($pFn) {
         $this->customFormat = $pFn;
@@ -158,7 +156,8 @@ class Client {
 
     /**
      * Returns the current formatting function/method.
-     * @return callable $customFormat The check access function/method.
+     * 
+     * @return callable The check access function/method.
      */
     public function getCustomFormat() {
         return $this->customFormat;
@@ -166,7 +165,7 @@ class Client {
 
     /**
      * Sends the actual response.
-     *
+     * 
      * @param string $pHttpCode The HTTP code to return.
      * @param $pMessage The data to return.
      * @return void
@@ -191,15 +190,13 @@ class Client {
         $method = $this->getOutputFormatMethod($this->getOutputFormat());
         if ($method == 'customFormat' && $this->customFormat == null) {
             echo $this->asJSON($pMessage, $unescape);
-        } 
-        else if ($method == 'customFormat' && $this->customFormat != null) {
-            $args = array($pMessage);
+        } else if ($method == 'customFormat' && $this->customFormat != null) {
+            $args = [$pMessage];
             $result = call_user_func_array($this->getCustomFormat(), $args);
             $this->setContentLength($result);
 
             echo $result;
-        }
-        else {
+        } else {
             if ($method == "asJSON" || $method == "json") {
                 echo $this->asJSON($pMessage, $unescape);
             }
@@ -233,7 +230,7 @@ class Client {
 
     /**
      * Detect the method.
-     *
+     * 
      * @return string 'get', 'post', 'put', 'delete', 'head', 'options', or 'patch'
      */
     public function getMethod() {
@@ -261,19 +258,23 @@ class Client {
 
     /**
      * Sets a custom http method.
-     *
-     * @param  string $pMethod 'get', 'post', 'put', 'delete', 'head', 'options', or 'patch'
-     * @return Client $this Client instance.
+     * 
+     * @param  string $pMethod  The request method.
+     * @return Client           Client instance.
      */
     public function setMethod($pMethod) {
+        $pMethod = strtolower($pMethod);
+        if (!in_array($pMethod, $this->methods))
+            $pMethod = 'get';
+        
         $this->method = $pMethod;
-
+        
         return $this;
     }
-
+    
     /**
      * Set header "Content-Length" from data.
-     *
+     * 
      * @param mixed $pMessage The data to set the header from.
      * @return void
      */
@@ -281,10 +282,10 @@ class Client {
         if (php_sapi_name() !== 'cli' )
             header('Content-Length: '.strlen($pMessage));
     }
-
+    
     /**
      * Converts data to pretty JSON.
-     *
+     * 
      * @param mixed $pMessage The data to convert.
      * @return string JSON version of the original data.
      */
@@ -292,25 +293,18 @@ class Client {
         if (php_sapi_name() !== 'cli' )
             header('Content-Type: application/json; charset=utf-8');
         
-
-        if ($unescape == 1) {
-            if (!is_string($pMessage)) $json = json_encode($pMessage, JSON_UNESCAPED_SLASHES);
-            else $json = $pMessage;
-        }
-        else {
-            if (!is_string($pMessage)) $json = json_encode($pMessage);
-            else $json = $pMessage;
-        }
-
+        $json = !is_string($pMessage)
+                    ? json_encode($pMessage, $unescape ? JSON_UNESCAPED_SLASHES : 0)
+                    : $pMessage;
+        
         $result      = '';
         $pos         = 0;
-        $strLen      = strlen($json);
         $indentStr   = '    ';
         $newLine     = "\n";
         $inEscapeMode = false; //if the last char is a valid \ char.
         $outOfQuotes = true;
 
-        for ($i=0; $i<=$strLen; $i++) {
+        for ($i = 0, $strLen = strlen($json); $i <= $strLen; $i++) {
 
             // Grab the next character in the string.
             $char = substr($json, $i, 1);
@@ -323,7 +317,7 @@ class Client {
                 // output a new line and indent the next line.
             } elseif (($char == '}' || $char == ']') && $outOfQuotes) {
                 $result .= $newLine;
-                $pos --;
+                $pos--;
                 for ($j=0; $j<$pos; $j++) {
                     $result .= $indentStr;
                 }
@@ -360,7 +354,7 @@ class Client {
 
     /**
      * Converts data to XML.
-     *
+     * 
      * @param mixed $pMessage The data to convert.
      * @param string $pParentTagName The name of the parent tag. Default is ''.
      * @param int $pDepth The depth of the current tag. Default is 1.
@@ -394,7 +388,7 @@ class Client {
 
     /**
      * Converts data to text.
-     *
+     * 
      * @param mixed $pMessage The data to convert.
      * @return string JSON version of the original data.
      */
@@ -414,9 +408,9 @@ class Client {
 
     /**
      * Set the current output format.
-     *
-     * @param  string $pFormat Name of the format.
-     * @return Client $this Client instance.
+     * 
+     * @param  string $pFormat  Name of the format.
+     * @return Client           Client instance.
      */
     public function setFormat($pFormat) {
         $this->outputFormat = $pFormat;
@@ -426,7 +420,7 @@ class Client {
 
     /**
      * Returns the current endpoint URL.
-     *
+     * 
      * @return string The current endpoint URL.
      */
     public function getURL() {
@@ -435,9 +429,9 @@ class Client {
 
     /**
      * Set the current endpoint URL.
-     *
+     * 
      * @param  string $pUrl The new endpoint URL.
-     * @return Client $this Client instance.
+     * @return Client       Client instance.
      */
     public function setURL($pUrl) {
         $this->url = $pUrl;
@@ -447,8 +441,8 @@ class Client {
 
     /**
      * Setup formats.
-     *
-     * @return Client $this Client instance.
+     * 
+     * @return Client Client instance.
      */
     public function setupFormats() {
         //through HTTP_ACCEPT
