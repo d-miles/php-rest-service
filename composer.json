@@ -1,13 +1,25 @@
 {
-    "name": "cdgco/php-rest-service",
+    "name": "d-miles/php-rest-service",
     "description": "PHP REST Service is a simple and fast PHP class for server side RESTful APIs.",
     "keywords": ["REST", "RESTful", "php", "API", "REST-API"],
     "license": "MIT",
-    "authors": [{
-        "name": "Carter Roeser",
-        "email": "carter@cdgtech.one",
-        "homepage": "https://cdgtech.one"
-    }],
+    "authors": [
+        {
+            "name": "Marc J. Schmidt",
+            "email": "marc@kryn.org",
+            "homepage": "http://marcjschmidt.de"
+        },
+        {
+            "name": "Carter Roeser",
+            "email": "carter@cdgtech.one",
+            "homepage": "https://cdgtech.one"
+        },
+        {
+            "name": "David Miles",
+            "email": "david@cowarama.com",
+            "homepage": "https://davidmil.es"
+        }
+    ],
     "require": {
         "php": ">=7.4.0"
     },
