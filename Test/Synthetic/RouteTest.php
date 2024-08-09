@@ -2,7 +2,7 @@
 
 namespace Test\Synthetic;
 
-use RestService\Server;
+use RestService\{Server, InternalClient};
 
 class RouteTest extends \PHPUnit\Framework\TestCase
 {
@@ -11,7 +11,7 @@ class RouteTest extends \PHPUnit\Framework\TestCase
     {
 
         $restService = Server::create('/')
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addGetRoute('test', function(){
                 return 'getTest';
             })

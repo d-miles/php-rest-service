@@ -2,7 +2,7 @@
 
 namespace Test\Synthetic;
 
-use RestService\Server;
+use RestService\{Server, InternalClient};
 use Test\Controller\MyRoutes;
 
 class CollectTest extends \PHPUnit\Framework\TestCase
@@ -15,7 +15,7 @@ class CollectTest extends \PHPUnit\Framework\TestCase
     public function setUp() : void
     {
         $this->restService = Server::create('/', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->collectRoutes();
     }
     public function testNonPhpDocMethod()

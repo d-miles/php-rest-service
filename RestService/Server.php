@@ -810,7 +810,7 @@ class Server
                     $this->routes[$phpDocs['url']][$httpMethod] = $method;
                 } else {
                     foreach($phpDocs['url'] as $urlAnnotation) {
-                        $this->routes[$urlAnnotation['url']][$httpMethod] = $method;
+                        $this->routes[$urlAnnotation][$httpMethod] = $method;
                     }
                 }
             } else {

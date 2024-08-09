@@ -2,7 +2,7 @@
 
 namespace Test\Synthetic;
 
-use RestService\Server;
+use RestService\{Server, InternalClient};
 use Test\Controller\MyRoutes;
 
 class BasicTest extends \PHPUnit\Framework\TestCase
@@ -10,7 +10,7 @@ class BasicTest extends \PHPUnit\Framework\TestCase
     public function testCustomUrl()
     {
         $restService = Server::create('/', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->collectRoutes();
 
         $response = $restService->simulateCall('/test/test', 'get');

@@ -2,7 +2,7 @@
 
 namespace Test\Synthetic;
 
-use RestService\Server;
+use RestService\{Server, InternalClient};
 use Test\Controller\MyRoutes;
 
 class CustomRoutesTest extends \PHPUnit\Framework\TestCase
@@ -11,7 +11,7 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
     public function testOwnController()
     {
         $restService = Server::create('/', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addPostRoute('login', 'postLogin');
 
         $response = $restService->simulateCall('/login?', 'post');
@@ -50,7 +50,7 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
     public function testOwnControllerWithDifferentPrefix()
     {
         $restService = Server::create('/v1', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addPostRoute('login', 'postLogin');
 
         $response = $restService->simulateCall('/v1/login?username=peter&password=pwd', 'post');
@@ -61,7 +61,7 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
 }', $response);
 
         $restService = Server::create('/v1/', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addPostRoute('login', 'postLogin');
 
         $response = $restService->simulateCall('/v1/login?username=peter&password=pwd', 'post');
@@ -72,7 +72,7 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
 }', $response);
 
         $restService = Server::create('v1', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addPostRoute('login', 'postLogin');
 
         $response = $restService->simulateCall('/v1/login?username=peter&password=pwd', 'post');
@@ -87,7 +87,7 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
     public function testSubController()
     {
         $restService = Server::create('v1', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addPostRoute('login', 'postLogin')
             ->addSubController('sub', new MyRoutes())
                 ->addPostRoute('login', 'postLogin')
@@ -106,7 +106,7 @@ class CustomRoutesTest extends \PHPUnit\Framework\TestCase
     public function testSubControllerWithSlashRootParent()
     {
         $restService = Server::create('/', new MyRoutes)
-            ->setClient('RestService\\InternalClient')
+            ->setClient(InternalClient::class)
             ->addSubController('sub', new MyRoutes())
                 ->addPostRoute('login', 'postLogin')
             ->done()
