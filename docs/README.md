@@ -30,7 +30,7 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
 PHP REST Service is a lightweight API framework for PHP. It is very easy to learn, use, and integrate with existing PHP projects. 
 
-This package is a fork of marcj/php-rest-service with the following changes:
+This package is a fork of `marcj/php-rest-service` with the following changes:
 * Support for PHP 7.4+
 * Support for plain text responses
 * Support for custom response formats
@@ -39,17 +39,17 @@ This package is a fork of marcj/php-rest-service with the following changes:
 * Single file structure
 * Complete documentation and examples
 
-Why build a new package? I wanted an express-like API router for PHP but couldn't find anything that fit my needs. marcj/php-rest-service is a great framework but it's deprecated and missing modern PHP support, documentation, and features that I needed.
+Why build a new package? I wanted an express-like API router for PHP but couldn't find anything that fit my needs. `marcj/php-rest-service` is a great framework but it's deprecated and missing modern PHP support, documentation, and features that I needed.
 
 ## Installation
 
 ### Requirements
 
-PHP REST Service requires PHP 7.4+. There are no dependecies.
+PHP REST Service requires PHP 8.1+. There are no dependecies.
 
 ### Composer
 
-Run `php composer require cdgco/php-rest-service`, then include the Composer autoloader with `include 'vendor/autoload.php';`.
+Run `php composer require d-miles/php-rest-service`, then include the Composer autoloader with `include 'vendor/autoload.php';`.
 
 ### Manual
 
