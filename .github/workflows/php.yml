@@ -66,8 +66,13 @@ jobs:
     name: Deploy to GitHub Pages
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Get phpDocumentor
+      run: wget https://phpdoc.org/phpDocumentor.phar
+      
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
+      
     - name: Generate phpDoc
       run: composer run-script phpdoc
       
