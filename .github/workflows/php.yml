@@ -61,6 +61,8 @@ jobs:
       
   deploy:
     needs: test
+    permissions:
+      pages: write
     runs-on: ubuntu-latest
 
     name: Deploy to GitHub Pages
