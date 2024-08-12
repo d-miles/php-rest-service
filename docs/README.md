@@ -5,10 +5,10 @@
 
 PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
-[![Build Status](https://img.shields.io/circleci/build/github/cdgco/php-rest-service?style=flat-square)](https://app.circleci.com/pipelines/github/cdgco/php-rest-service)
-[![PHP Version](https://img.shields.io/packagist/php-v/cdgco/php-rest-service?style=flat-square)](https://www.php.net/downloads)
-[![Package Version](https://img.shields.io/packagist/v/cdgco/php-rest-service?style=flat-square)](https://packagist.org/packages/cdgco/php-rest-service)
-[![License](https://img.shields.io/github/license/cdgco/php-rest-service?style=flat-square)](https://github.com/cdgco/php-rest-service/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/d-miles/php-rest-service/php.yml?logo=php&logoColor=%23777BB4&logoSize=auto&labelColor=%23efefef)](https://github.com/d-miles/php-rest-service/actions/workflows/php.yml)
+[![PHP Version](https://img.shields.io/packagist/php-v/d-miles/php-rest-service?style=flat-square)](https://www.php.net/downloads)
+[![Package Version](https://img.shields.io/packagist/v/d-miles/php-rest-service?style=flat-square)](https://packagist.org/packages/d-miles/php-rest-service)
+[![License](https://img.shields.io/github/license/d-miles/php-rest-service?style=flat-square)](https://github.com/d-miles/php-rest-service/blob/master/LICENSE)
 </div>
 
 ## Features
@@ -30,8 +30,8 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
 PHP REST Service is a lightweight API framework for PHP. It is very easy to learn, use, and integrate with existing PHP projects. 
 
-This package is a fork of `marcj/php-rest-service` with the following changes:
-* Support for PHP 7.4+
+This package is a fork of `marcj/php-rest-service`/`cdgco/php-rest-service` with the following changes:
+* Support for PHP 8.1+
 * Support for plain text responses
 * Support for custom response formats
 * Support for pre-response control functions
@@ -327,27 +327,27 @@ To enable OpenAPI generation, simply use the [`setApiSpec()`](phpdoc/#serverseta
 
 ```php
 Server::create('test')
-    -->setApiSpec("My New API", "1.2.3", "This is my new API", "https://example.com/api", true)
+    ->setApiSpec("My New API", "1.2.3", "This is my new API", "https://example.com/api", true)
     ->addGetRoute('', function($test) {
         return "Hello ". $test;
     })
 ```
 
-This will generate an OpenAPI specification in JSON format, accessible at the `/spec` GET endpoint of your API, including all endpoints in child controllers.
+This will generate an OpenAPI specification in JSON format, accessible at the `/openapi` GET endpoint of your API, including all endpoints in child controllers.
 
-!> Note: If there is another endpoint named `/spec`, it will take priority over the OpenAPI specification.
+!> Note: If there is another endpoint named `/openapi`, it will take priority over the OpenAPI specification.
 
 Request and response types and descriptions will be pulled from the comment blocks of your endpoint functions.
 If no comment annotations are detected, the request / respone types will default to `AnyValue`.
 
-If your URL contains regex, REST API Service will attempt to scan your string and replace any regex capture groups with the corresponding argument name, and delete any non-capture groups, however, it is unable to process regex commands outside of capture groups. In order to specify the correct URL that will be used in the specification, you can provide the `@openapiurl` annotation on your endpoint function.
+If your URL contains regex, REST API Service will attempt to scan your string and replace any regex capture groups with the corresponding argument name, and delete any non-capture groups, however, it is unable to process regex commands outside of capture groups. In order to specify the correct URL that will be used in the specification, you can provide the `@openapi-url` annotation on your endpoint function.
 
 For example, say you already have an endpoint at `/foo/(\d+)` and you want to add an endpoint at `/foo/\d+/(\w+)`. While you could rewrite this to use non-capture groups like `/foo/(?:\d+)/(\w+)`, you can also add the following annotation to the endpoint function:
 
 ```php
 /**
  * @url /foo/\d+/(\w+)
- * @openapiurl /foo/{var1}/{var2}
+ * @openapi-url /foo/{var1}/{var2}
  */
 ```
 

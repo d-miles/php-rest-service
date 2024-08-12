@@ -100,8 +100,3 @@
     * [parsePhpDoc](phpdoc/#serverparsephpdoc)
     * [argumentName](phpdoc/#serverargumentname)
     * [findRoute](phpdoc/#serverfindroute)
-
-
-      
-      
-      

@@ -4,12 +4,12 @@
 
 PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
-[![Build Status](https://img.shields.io/circleci/build/github/cdgco/php-rest-service?style=flat-square)](https://app.circleci.com/pipelines/github/cdgco/php-rest-service)
-[![PHP Version](https://img.shields.io/packagist/php-v/cdgco/php-rest-service?style=flat-square)](https://www.php.net/downloads)
-[![Package Version](https://img.shields.io/packagist/v/cdgco/php-rest-service?style=flat-square)](https://packagist.org/packages/cdgco/php-rest-service)
-[![License](https://img.shields.io/github/license/cdgco/php-rest-service?style=flat-square)](https://github.com/cdgco/php-rest-service/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/d-miles/php-rest-service/php.yml?logo=php&logoColor=%23777BB4&logoSize=auto&labelColor=%23efefef)](https://github.com/d-miles/php-rest-service/actions/workflows/php.yml)
+[![PHP Version](https://img.shields.io/packagist/php-v/d-miles/php-rest-service?style=flat-square)](https://www.php.net/downloads)
+[![Package Version](https://img.shields.io/packagist/v/d-miles/php-rest-service?style=flat-square)](https://packagist.org/packages/d-miles/php-rest-service)
+[![License](https://img.shields.io/github/license/d-miles/php-rest-service?style=flat-square)](https://github.com/d-miles/php-rest-service/blob/master/LICENSE)
 
-[https://cdgco.github.io/php-rest-service](https://cdgco.github.io/php-rest-service)
+[https://d-miles.github.io/php-rest-service](https://d-miles.github.io/php-rest-service)
 </div>
 
 ## Features
@@ -31,7 +31,7 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 ## Requirements
 * PHP 8.1+ (Tested on PHP 8.1 - 8.4)
 ## Installation
-`php composer require cdgco/php-rest-service`
+`php composer require d-miles/php-rest-service`
 
 ## Demo
 
@@ -93,7 +93,7 @@ Both methods will generate the following endpoints:
 
 # Documentation
 
-Read the full documentation at [https://cdgco.github.io/php-rest-service](https://cdgco.github.io/php-rest-service).
+Read the full documentation at [https://d-miles.github.io/php-rest-service](https://d-miles.github.io/php-rest-service).
 
 ## License
 

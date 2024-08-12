@@ -5,18 +5,29 @@ on: [push]
   #  branches: [ "main" ]
   #pull_request:
   #  branches: [ "main" ]
-
+  
 permissions:
   contents: read
-
+  
 jobs:
-  build-test:
-
+  supported-php-versions:
+    runs-on: ubuntu-latest
+    
+    name: Get supported PHP versions
+    outputs:
+      php-versions: ${{ steps.versions.outputs.range }}
+    steps:
+      - uses: tighten/phpreleases-action@v1
+        id: versions
+  
+  test:
+    needs: supported-php-versions
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['8.1', '8.2', '8.3', '8.4']
+        #php-versions: ['8.1', '8.2', '8.3', '8.4']
+        php-versions: ${{ fromJSON(needs.supported-php-versions.outputs.php-versions) }}
         
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
@@ -29,21 +40,42 @@ jobs:
         
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
-
-    - name: Cache Composer packages
+      
+    - name: Get composer cache directory
       id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      
+    - name: Cache Composer packages
       uses: actions/cache@v3
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
-          ${{ runner.os }}-php-
+          ${{ runner.os }}-composer-
           
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
       
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
-    
-    - name: Run test suite
+    - name: Run tests
       run: composer run-script test
+      
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    name: Deploy to GitHub Pages
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+    - name: Generate phpDoc
+      run: composer run-script phpdoc
+      
+    - name: Upload GitHub Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: docs/
+        
+    - name: Deploy GitHub Pages site
+      id: deployment
+      uses: actions/deploy-pages@v4
