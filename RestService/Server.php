@@ -960,11 +960,13 @@ class Server
                 if (isset($_SERVER['REQUEST_METHOD'])) {
                     $method = $_SERVER['REQUEST_METHOD'];
                     if ('PUT' === $method || 'POST' === $method) {
-                        try {  
-                            $_PUT = json_decode(file_get_contents("php://input"), true, 512, JSON_THROW_ON_ERROR);
-                        }  
-                        catch (\JsonException $ex) {  
-                            parse_str(file_get_contents('php://input'), $_PUT);
+                        $input = file_get_contents("php://input");
+                        if ($input) {
+                            try {
+                                $_PUT = json_decode($input, true, 512, JSON_THROW_ON_ERROR);
+                            } catch (\JsonException) {
+                                $_PUT = parse_str($input, $_PUT);
+                            }
                         }
                     }
                 }
@@ -972,8 +974,8 @@ class Server
                 if (!$param->isOptional() && !isset($_GET[$name]) && !isset($_POST[$name]) && !isset($_PUT[$name])) {
                     return $this->sendBadRequest('MissingRequiredArgumentException', sprintf("Argument '%s' is missing.", $name));
                 }
-
-                $arguments[] = isset($_GET[$name]) ? ($_GET[$name]) : (isset($_POST[$name]) ? $_POST[$name] : (isset($_PUT[$name]) ? $_PUT[$name] : $param->getDefaultValue()));
+                
+                $arguments[] = $_GET[$name] ?? $_POST[$name] ?? $_PUT[$name] ?? $param->getDefaultValue();
             }
         }
 

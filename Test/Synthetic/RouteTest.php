@@ -2,14 +2,16 @@
 
 namespace Test\Synthetic;
 
-use RestService\{Server, InternalClient};
+use PHPUnit\Framework\TestCase;
+use RestService\Server;
+use Test\Client\InternalClient;
 
-class RouteTest extends \PHPUnit\Framework\TestCase
+class RouteTest extends TestCase
 {
-
+    
     public function testAllRoutesClosures()
     {
-
+        
         $restService = Server::create('/')
             ->setClient(InternalClient::class)
             ->addGetRoute('test', function(){
@@ -36,21 +38,24 @@ class RouteTest extends \PHPUnit\Framework\TestCase
             ->addRoute('all-test', function(){
                 return 'allTest';
             });
-
+        
         foreach ($restService->getClient()->methods as $method) {
-
-            $this->assertEquals('{
-    "status": 200,
-    "data": "'.$method.'Test"
-}', $restService->simulateCall('/test', $method));
-
-            $this->assertEquals('{
-    "status": 200,
-    "data": "allTest"
-}', $restService->simulateCall('/all-test', $method));
-
+            $this->assertEquals(<<<JSON
+            {
+                "status": 200,
+                "data": "{$method}Test"
+            }
+            JSON, $restService->simulateCall('/test', $method));
+            
+            $this->assertEquals(<<<JSON
+            {
+                "status": 200,
+                "data": "allTest"
+            }
+            JSON, $restService->simulateCall('/all-test', $method));
+            
         }
-
+        
     }
-
+    
 }

@@ -2,10 +2,12 @@
 
 namespace Test\Synthetic;
 
-use RestService\{Server, InternalClient};
+use PHPUnit\Framework\TestCase;
+use RestService\Server;
+use Test\Client\InternalClient;
 use Test\Controller\MyRoutes;
 
-class BasicTest extends \PHPUnit\Framework\TestCase
+class BasicTest extends TestCase
 {
     public function testCustomUrl()
     {

@@ -1,6 +1,8 @@
 <?php
 
-namespace RestService;
+namespace Test\Client;
+
+use RestService\Client;
 
 /**
  * This client does not send any HTTP data, instead it just returns the value.
@@ -8,6 +10,7 @@ namespace RestService;
  * Good for testing purposes.
  */
 class InternalClient extends Client {
+    
     /**
      * Sends the actual response.
      * 

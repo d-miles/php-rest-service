@@ -2,5 +2,5 @@
 vendor/
 docs/phpdoc/
 *.phar
-.phpunit.result.cache
+.phpunit.cache/
 .phpdoc
