@@ -89,12 +89,11 @@ jobs:
             MIN_PHP_VERSION: `${(${{ needs.supported-php-versions.outputs.php-versions }})[0]}`,
             TESTED_PHP_VERSIONS: ${{ needs.supported-php-versions.outputs.php-versions }}.join(', '),
           };
-        result-encoding: string
     
     - name: replacements
       uses: austenstone/markdown-interpolation-action@v2
       with:
-        values: ${{ fromJSON(steps.replacements.outputs.result) }}
+        values: ${{ steps.replacements.outputs.result }}
         files-regex: docs\/.*\.(md|html?)
       
     - name: Upload GitHub Pages artifact
