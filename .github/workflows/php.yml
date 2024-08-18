@@ -60,6 +60,7 @@ jobs:
       run: composer run-script test
       
   deploy:
+    #if: github.ref_type == 'tag'
     needs: [supported-php-versions, test]
     permissions:
       id-token: write
@@ -85,7 +86,7 @@ jobs:
         script: |
           return {
             CURRENT_VERSION: '${{ github.ref_name }}',
-            MIN_PHP_VERSION: (${{ needs.supported-php-versions.outputs.php-versions }})[0],
+            MIN_PHP_VERSION: `${(${{ needs.supported-php-versions.outputs.php-versions }})[0]}`,
             TESTED_PHP_VERSIONS: ${{ needs.supported-php-versions.outputs.php-versions }}.join(', '),
           };
         result-encoding: string
@@ -93,7 +94,7 @@ jobs:
     - name: replacements
       uses: austenstone/markdown-interpolation-action@v2
       with:
-        values: ${{ steps.replacements.outputs.result }}
+        values: ${{ fromJSON(steps.replacements.outputs.result) }}
         files-regex: docs\/.*\.(md|html?)
       
     - name: Upload GitHub Pages artifact
