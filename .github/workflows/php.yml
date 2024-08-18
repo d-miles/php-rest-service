@@ -84,9 +84,9 @@ jobs:
       with:
         script: |
           return {
-            CURRENT_VERSION: ${{ github.ref_name }},
-            MIN_PHP_VERSION: ${{ fromJSON(needs.supported-php-versions.outputs.php-versions) }}[0],
-            TESTED_PHP_VERSIONS: ${{ fromJSON(needs.supported-php-versions.outputs.php-versions) }}.join(', '),
+            CURRENT_VERSION: '${{ github.ref_name }}',
+            MIN_PHP_VERSION: (${{ needs.supported-php-versions.outputs.php-versions }})[0],
+            TESTED_PHP_VERSIONS: ${{ needs.supported-php-versions.outputs.php-versions }}.join(', '),
           };
         result-encoding: string
     
