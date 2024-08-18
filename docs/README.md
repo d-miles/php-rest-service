@@ -565,7 +565,3 @@ Server::create('/', MyRestApi\Admin::class)
 ```
 
 <!-- panels:end -->
-
-## License
-
-Licensed under the MIT License. See the LICENSE file for more details.
