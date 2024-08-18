@@ -1,7 +1,7 @@
 <div align="center">
 
 <!--lint ignore no-dead-urls-->
-# PHP REST Service
+# PHP REST Service <!--CURRENT_VERSION--><!--END CURRENT_VERSION-->
 
 PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 
@@ -14,52 +14,35 @@ PHP REST Service is a simple and fast PHP class for RESTful JSON APIs.
 ## Features
 
 + Easy to use syntax
-+ Regular Expression support
-+ Error handling through PHP Exceptions
-+ JSON, XML, and plain text responses
++ Regular Expression routing support
++ Error handling using `Exception`
++ Support for JSON, XML, and plain-text responses by default
++ Automatic endpoint generation using reflection
++ Automatic parameter validation using function signature
 + Automatic OpenAPI specification generation
-+ Parameter validation through PHP function signature
-+ Can return a summary of all routes or one route through `OPTIONS` method based on PHPDoc (if `OPTIONS` is not overridden)
-+ Support of `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD` and `OPTIONS`
-+ Suppress the HTTP status code with `?_suppress_status_code=1` (for clients that have troubles with that)
-+ Supports `?_method=<httpMethod>` as addition to the actual HTTP method.
-+ Supports custom error handling, logging, access control and response formatting functions.
-+ With auto-generation through PHP's `reflection`
-
-## About
-
-PHP REST Service is a lightweight API framework for PHP. It is very easy to learn, use, and integrate with existing PHP projects. 
-
-This package is a fork of `marcj/php-rest-service`/`cdgco/php-rest-service` with the following changes:
-* Support for PHP 8.1+
-* Support for plain text responses
-* Support for custom response formats
-* Support for pre-response control functions
-* Automatic OpenAPI specification generation
-* Single file structure
-* Complete documentation and examples
-
-Why build a new package? I wanted an express-like API router for PHP but couldn't find anything that fit my needs. `marcj/php-rest-service` is a great framework but it's deprecated and missing modern PHP support, documentation, and features that I needed.
++ Custom access control
++ Custom exception handling
++ Custom response formatting
++ Support for all HTTP methods (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, and `OPTIONS`)
+  + Suppress the HTTP status code with `?_suppress_status_code=1` (for clients that have troubles with that)
+  + Override HTTP method using query string: `?_method={httpMethod}`
+  + Summarize routes using the `OPTIONS` HTTP method
 
 ## Installation
 
 ### Requirements
 
-PHP REST Service requires PHP 8.1+. There are no dependecies.
+PHP REST Service requires PHP <!--MIN_PHP_VERSION-->8.1<!--END MIN_PHP_VERSION-->+ and has been tested using PHP <!--TESTED_PHP_VERSIONS-->8.1, 8.2, and 8.3<!--END TESTED_PHP_VERSIONS-->. There are no dependecies.
 
 ### Composer
 
-Run `php composer require d-miles/php-rest-service`, then include the Composer autoloader with `include 'vendor/autoload.php';`.
+Run `php composer require d-miles/php-rest-service`, then include the Composer autoloader with `require 'vendor/autoload.php';`.
 
-### Manual
+### Web Server Configuration
 
-Copy `Server.php` to your directory and include with `include 'Server.php';`.
+PHP REST Service acts as a single page application, so all requests must be redirected to the `index.php` file.
 
-## Web Server Configuration
-
-PHP REST Service acts as a single page application, so all requests must be sent to the index.php file (or the file you want to serve).
-
-For example, on apache, you can add the following lines to your `.htaccess` file which will redirect all requests for directories or non-existant files to index.php:
+For example, if you are using Apache you can add the following lines to your `.htaccess` file to redirect all requests to `index.php`:
 
 ```apacheconf
 RewriteEngine On
@@ -68,112 +51,165 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule (.+) index.php/$1 [L,QSA]
 ```
 
+Nginx's default behaviour will do the same, meaning that there is no need for the same type of configuration when the file is named `index.php`.
+
 ## Basic Usage
 
+<!-- panels:start -->
+<!-- div:left-panel -->
+
 ### Manual Endpoint Creation
+With manual endpoint creation, you must define a new route for each endpoint you want to expose using the following methods:
 
-With manual endpoint creation, you must define a new route for each endpoint you want to expose.
-This is done by using the [`addGetRoute()`](phpdoc/#serveraddgetroute), [`addPostRoute()`](phpdoc/#serveraddpostroute), [`addPutRoute()`](phpdoc/#serveraddputroute),[`addDeleteRoute()`](phpdoc/#serveradddeleteroute), [`addPatchRoute()`](phpdoc/#serveraddpatchroute), [`addHeadRoute()`](phpdoc/#serveraddheadroute), [`addOptionsRoute()`](phpdoc/#serveraddoptionsroute) and [`addRoute()`](phpdoc/#serveraddroute) methods. 
+* <span style="font-family: monospace">GET&nbsp;&nbsp;&nbsp;&nbsp;</span> [`addGetRoute()`](phpdoc/#serveraddgetroute)
+* <span style="font-family: monospace">POST&nbsp;&nbsp;&nbsp;</span> [`addPostRoute()`](phpdoc/#serveraddpostroute)
+* <span style="font-family: monospace">PUT&nbsp;&nbsp;&nbsp;&nbsp;</span> [`addPutRoute()`](phpdoc/#serveraddputroute)
+* <span style="font-family: monospace">DELETE&nbsp;</span> [`addDeleteRoute()`](phpdoc/#serveradddeleteroute)
+* <span style="font-family: monospace">PATCH&nbsp;&nbsp;</span> [`addPatchRoute()`](phpdoc/#serveraddpatchroute)
+* <span style="font-family: monospace">HEAD&nbsp;&nbsp;&nbsp;</span> [`addHeadRoute()`](phpdoc/#serveraddheadroute)
+* <span style="font-family: monospace">OPTIONS</span> [`addOptionsRoute()`](phpdoc/#serveraddoptionsroute)
 
-All route methods accept a path and a callback (e.g. `addGetRoute('path', 'callbackFunction')`), while the `addRoute()` method also accepts the HTTP method (e.g. `addRoute('path', 'callbackFunction', 'get')`). If no method is specified, the default method is `_all_`.
+Each of these methods has the following signature:
+```php
+function (string $path, callable $callbackFn)
+```
 
-Each of the aforementioned methods will add a route for the specified HTTP method, with the exception of `addRoute()` which will add a route for all HTTP methods.
+Alternatively, you could also use [`addRoute()`](phpdoc/#serveraddroute) to add a route for a specific HTTP method, or omit the `$method` argument altogether to add a route for _all_ HTTP methods:
+```php
+function addRoute(string $path, callable $callbackFn, string $method = '_all_')
+```
 
+### Automatic Endpoint Generation
+
+With automatic endpoint generation, you can supply a PHP class that contains endpoint functions. By calling the [`collectRoutes()`](phpdoc/#servercollectroutes) method, the router will scan the class for functions that start with `get`, `post`, `put`, `delete`, `patch`, `head` or `options` and add the corresponding route.
+
+Function names will be converted from camel-case to dash-case. eg. `getFooBar()` will be converted to `/foo-bar`.
+
+You can also bind a function to a route other than the function name. Simply use the `@url` PHPDoc annotation to define the route.
+For example, `@url /foo-bar` will bind the function to the same route as `getFooBar()`.
+
+<!-- div:right-panel -->
+
+#### Example
+
+<!-- tabs:start -->
+
+##### **Manual Endpoints**
 ```php
 use RestService\Server;
 
 Server::create('/')
-  ->addGetRoute('test', function(){
-    return 'Yay!';
-  })
-  ->addPostRoute('foo', function($field1) {
-    return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
-  })
-  >addGetRoute('use/this/name', function(){
-      return 'Hi there';
-  })
-->run();
-
+    ->addGetRoute('test', function() {
+        return 'Yay!';
+    })
+    ->addPostRoute('foo', function($field1) {
+        // $field1 is the equivalent of $_POST['field1']
+        return 'Hello ' . $field1;
+    })
+    ->addGetRoute('use/this/name', function() {
+        return 'Hi there';
+    })
+    ->run();
 ```
 
-### Auto Endpoint Creation
-
-With automatic endpoint creation, you can supply a PHP class that contains endpoint functions. By calling the [`collectRoutes()`](phpdoc/#servercollectroutes) method, the router will then scan the class for functions that start with `get`, `post`, `put`, `delete`, `patch`, `head` or `options` and add the corresponding route.
-
-Function names will be converted from camel case to dashes,  so `getFooBar()` will be converted to `/foo-bar`.
-
-You can also bind a function to a route other than the function name. Simply use the `@url` annotation to define the route.
-For example `@url /foo` will bind the function to the route `/foo`.
-
+##### **Automatic Endpoints**
 ```php
 namespace MyRestApi;
 
 use RestService\Server;
 
 class Admin {
-  public function getTest(){
-    return 'Yay!';
-  }
-  public function postFoo($field1){
-    return 'Hello ' . $field1; // same as "return 'Hello ' . $_POST('field1');"
-  }
-  /*
-   * @url /use/this/name
-   */
-  public function getNotThisName($field1){
-    return 'Hi there';
-  }
+    public function getTest(){
+        return 'Yay!';
+    }
+    
+    public function postFoo($field1){
+      // $field1 is the equivalent of $_POST['field1']
+      return 'Hello ' . $field1;
+    }
+    
+    /*
+     * @url /use/this/name
+     */
+    public function getNotThisName($field1){
+        return 'Hi there';
+    }
 }
 
-Server::create('/', 'myRestApi\Admin')
+Server::create('/', Admin::class)
     ->collectRoutes()
-->run();
+    ->run();
 ```
 
-Both methods will generate the following endpoints:
+<!-- tabs:end -->
+
+Both examples above generate the following endpoints:
 ```
 + GET  /test
 + POST /foo
 + GET  /use/this/name
 ```
 
+<!-- panels:end -->
+
 ## Advanced Usage
 
-### Regex in Paths
+### Regular Expressions
 
-For more advanced routing, you can use regular expressions in the path. Either through the `path` argument in the [`addRoute()`](phpdoc/#serveraddroute) method, or the `@url` annotation in the function comment.
+For more advanced routing, you can use a regular expression in the `$path` value. When using automatic endpoint generation, this must be done using the `@url` PHPDoc annotation.
 
-For example, in order to match all routes that start with `/foo`, you can use the following:
+?> **NOTE** The router wraps the `$path`/`@url` value with `^` (start-of-line match) and `$` (end-of-line match) to match the entire path, using the delimiter `|`.
 
+<!-- panels:start -->
+
+<!-- div:left-panel -->
+
+#### Dynamic URLs
+
+In order to match all routes that start with `/foo/`, you would do one of the following:
+
+<!-- div:right-panel -->
+
+<!-- tabs:start -->
+
+###### **Manual Endpoints**
 ```php
-->addGetRoute('foo/.*', 'getFoo')
+->addGetRoute('foo/.*', fn() => 'bar')
 ```
 
-or 
-
+###### **Automatic Endpoints**
 ```php
 /**
  * @url foo/.*
  */
-public function getFoo(){
-  return 'Yay!';
+public function getFoo() {
+    return 'bar';
 }
 ```
 
-!> Note that the API server wraps the path / url argument in `^` and `$` to match the entire path, with the delimiter `|`.
+<!-- tabs:end -->
 
-### URL Parameters
+<!-- panels:end -->
 
-To capture parameters from the URL for use as function arguments, simply use regex capture groups in the `path` argument of the [`addRoute()`](phpdoc/#serveraddroute) method, or the `@url` annotation in the function comment.
+<!-- panels:start -->
+<!-- div:left-panel -->
 
-For example, in order to match the `:id` and `:action` parameters in the following URL, `/foo/:id/something/:action`, where `:id` is a int and `:action` is a string, you can use the following:
+#### Capturing URL Parameters
 
+To capture parameters from the URL for use as function arguments, simply include one or more capturing groups in the `$path`/`@url` value.
+
+For example, in order to match the `:id` and `:action` parameters in the following URL, `/foo/:id/something/:action`, where `:id` is an integer and `:action` is a string, you can use the following:
+
+<!-- div:right-panel -->
+
+<!-- tabs:start -->
+
+###### **Manual Endpoints**
 ```php
 ->addPostRoute('foo/(\d+)/something/(\w+)', 'postFoo')
 ```
 
-or 
-
+###### **Automatic Endpoints**
 ```php
 /**
  * @url foo/(\d+)/something/(\w+)
@@ -183,7 +219,11 @@ public function postFoo($arg1, $arg2){
 }
 ```
 
-The API server will automatically bind the captured parameters to the first `n` arguments of the function where `n` is the number of capture groups in the regex pattern.
+<!-- tabs:end -->
+
+<!-- panels:end -->
+
+The server will automatically bind the captured parameters to the first `n` arguments of the function, where `n` is the number of capture groups in the regular expression.
 
 You can still use GET, POST, and PUT parameters in the endpoint, but they must be bound to variables after the capture groups.
 
@@ -197,66 +237,6 @@ public function postFoo($arg1, $arg2, $content){
   return 'Yay!';
 }
 ```
-
-### Access Control
-
-In order to restrict access to endpoints, you can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method to supply an access control function.
-
-The access control function will be called with the following arguments:
-
-`function($url, $route, $method, $arguments)`
-
-In order to deny access, simply throw an exception inside of the function.
-
-For example, in order to deny POST access to the `/foo` endpoint if the `X-API-KEY` header is not set, use the following:
-
-```php
-->setCheckAccess(function($url, $route, $method, $args) {
-    if ($method == "post" && $route == "foo" && !isset($_SERVER['HTTP_X_API_KEY'])) {
-        throw new \Exception("Access Denied", 401);
-    }
-})
-```
-
-### Logging
-
-You can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method for any sort of pre-response logic you wish to execute, such as logging:
-
-```php
-->setCheckAccess(function($url, $route, $method, $args) {
-    $log  = "User: ".$_SERVER['REMOTE_ADDR'].' - '.date("F j, Y, g:i a").PHP_EOL.
-    "URL: ".$url.PHP_EOL.
-    "Method: ".$method.PHP_EOL.
-    "Route: ".$route.PHP_EOL.
-    "Args: ".json_encode($args).PHP_EOL.
-    "---------------------------------------------".PHP_EOL;
-    file_put_contents('log_'.date("j.n.Y").'.log', $log,  FILE_APPEND | LOCK_EX);
-})
-```
-
-### Rate Limiting
-
-[`setCheckAccess()`](phpdoc/#serversetcheckaccess) could also be used as a rate limiter:
-
-```php
-->setCheckAccess(function($url, $route, $method, $args) {
-    $redis = new \Redis();
-    $redis->connect('localhost');
-
-    $key = "api_".$_SERVER['REMOTE_ADDR'];
-    $limit = 10;
-    $time = 60;
-    
-    $count = $redis->get($key);
-    if ($count >= $limit) {
-        throw new \Exception("Rate Limit Exceeded", 429);
-    }
-    $redis->incr($key);
-    $redis->expire($key, $time);
-})
-```
-
-!> Note: You may only assign one checkAccess function per controller, so if you want to execute multiple pre-response actions, you must combine them into one function.
 
 ### Response Formatting
 
@@ -276,9 +256,9 @@ Server::create('test')
         ->setFormat('text')
     ->getController()
     ->addGetRoute('', function($test) {
-        return "Hello ". $test;
+        return "Hello {$test}";
     })
-->run();
+    ->run();
 ```
 
 #### Custom Response Formatters
@@ -306,43 +286,62 @@ Server::create('test')
 
             $text = '';
             foreach ($message as $key => $data) {
-                $key = is_numeric($key) ? '' : $key.': ';
-                $text .= $key.$data."\n";
+                $key = is_numeric($key) ? '' : "{$key}: ";
+                $text .= "{$key}{$data}\n";
             }
             return $text;
         })
         ->setFormat('custom')
     ->getController()
     ->addGetRoute('', function($test) {
-        return "Hello ". $test;
+        return "Hello {$test}";
     })
-->run();
+    ->run();
 ```
 
 ### OpenAPI Specification
 
+<!-- panels:start -->
+<!-- div:left-panel -->
+
 PHP REST Service can automatically generate an OpenAPI specification file for your API.
 
-To enable OpenAPI generation, simply use the [`setApiSpec()`](phpdoc/#serversetapispec) method on the desired controller, passing the name, version, description (optional), base path (optional), and whether or not to include child controllers (optional).
+To enable OpenAPI generation, simply use the [`setApiSpec()`](phpdoc/#serversetapispec) method on the desired controller, passing the name, version, description (optional), base path (optional), additional information defined by the [`Info Object`](https://swagger.io/specification/#info-object) as part of the OpenAPI spec (optional), and whether or not to recursively include child controllers (optional).
+
+The following example will generate an OpenAPI specification in JSON format, accessible at the `/openapi.json` GET endpoint of your API, including all endpoints in child controllers.
+
+Request and response types and their descriptions will be pulled from the PHPDoc comments of your endpoint functions. If no comment annotations are detected, the request and response types will default to `AnyValue`.
+
+?> **Note:** If you have already defined an endpoint named `/openapi.json`, it will take precedent over the internally-generated route.
+
+<!-- div:right-panel -->
 
 ```php
 Server::create('test')
-    ->setApiSpec("My New API", "1.2.3", "This is my new API", "https://example.com/api", true)
+    ->setApiSpec('My New API', '1.2.3',
+                 description: 'This is my new API', 
+                 server: 'https://example.com/api',
+                 additionalInfo: [
+                    'contact' => [
+                        'name'  => 'John Doe',
+                        'email' => 'john.doe@example.com'
+                    ]
+                 ]
+                 recurse: true)
     ->addGetRoute('', function($test) {
-        return "Hello ". $test;
+        return "Hello {$test}";
     })
 ```
 
-This will generate an OpenAPI specification in JSON format, accessible at the `/openapi` GET endpoint of your API, including all endpoints in child controllers.
+<!-- panels:end -->
 
-!> Note: If there is another endpoint named `/openapi`, it will take priority over the OpenAPI specification.
+#### Specifying a custom URL
 
-Request and response types and descriptions will be pulled from the comment blocks of your endpoint functions.
-If no comment annotations are detected, the request / respone types will default to `AnyValue`.
+<!-- panels:start -->
+<!-- div:left-panel -->
+If your route contains regular expressions with capturing groups, an attempt will be made to match the capturing group to the corresponding argument name; however, it is unable to parse argument names from regular expressions without capturing groups. In these instances, you could instead add the `@openapi-url` PHPDoc annotation to your endpoint function.
 
-If your URL contains regex, REST API Service will attempt to scan your string and replace any regex capture groups with the corresponding argument name, and delete any non-capture groups, however, it is unable to process regex commands outside of capture groups. In order to specify the correct URL that will be used in the specification, you can provide the `@openapi-url` annotation on your endpoint function.
-
-For example, say you already have an endpoint at `/foo/(\d+)` and you want to add an endpoint at `/foo/\d+/(\w+)`. While you could rewrite this to use non-capture groups like `/foo/(?:\d+)/(\w+)`, you can also add the following annotation to the endpoint function:
+<!-- div:right-panel -->
 
 ```php
 /**
@@ -351,26 +350,106 @@ For example, say you already have an endpoint at `/foo/(\d+)` and you want to ad
  */
 ```
 
+<!-- panels:end -->
+
+### Access Control
+
+<!-- panels:start -->
+<!-- div:left-panel -->
+
+In order to restrict access to endpoints, you can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method to supply an access control function. Access will be denied when the access control function throws an exception.
+
+The access control function has the following method signature:
+
+```php
+function(string $url, string $route, string $method, array $args)
+```
+
+<!-- div:right-panel -->
+
+To deny POST access to the `/foo` endpoint when the `X-API-KEY` header is not set:
+
+```php
+->setCheckAccess(function($url, $route, $method, $args) {
+    if ($method == "post" && $route == "foo" && !isset($_SERVER['HTTP_X_API_KEY'])) {
+        throw new \Exception("Access Denied", 401);
+    }
+})
+```
+
+<!-- panels:end -->
+
+### Other Uses
+
+You can use the [`setCheckAccess()`](phpdoc/#serversetcheckaccess) method for any sort of pre-response logic you wish to execute, such as logging or rate limiting:
+
+<!-- tabs:start -->
+
+#### **Logging**
+
+```php
+->setCheckAccess(function($url, $route, $method, $args) {
+    $date = new DateTime;
+    $log = "User: {$_SERVER['REMOTE_ADDR']} - {$date->format('F j, Y, g:i a')}" . PHP_EOL .
+           "URL: {$url}" . PHP_EOL .
+           "Method: {$method}" . PHP_EOL .
+           "Route: {$route}" . PHP_EOL .
+           "Args: " . json_encode($args) . PHP_EOL .
+           "---------------------------------------------" . PHP_EOL;
+    $logFile = "log_{$date->format('j.n.Y')}.log";
+    file_put_contents($logFile, $log, FILE_APPEND | LOCK_EX);
+})
+```
+
+#### **Rate Limiting**
+
+```php
+->setCheckAccess(function($url, $route, $method, $args) {
+    $redis = new \Redis();
+    $redis->connect('localhost');
+
+    $key = "api_" . $_SERVER['REMOTE_ADDR'];
+    $limit = 10;
+    $time = 60;
+    
+    $count = $redis->get($key);
+    if ($count >= $limit)
+        throw new \Exception("Rate Limit Exceeded", 429);
+
+    $redis->incr($key);
+    $redis->expire($key, $time);
+})
+```
+
+<!-- tabs:end -->
+
+?> Note: You may only assign one checkAccess function per controller, so if you need to perform multiple pre-response actions for a single controller, you must combine the logic into a single function.
+
 ## Responses
 
-The response body is always a JSON object containing a status code and the actual data.
-If a exception has been thrown, it contains the error code, the exception class name as error and the message as message.
+By default, the response body is a JSON object containing a status code with the data. If an exception is thrown, the response will contain the error code, the `Exception` class name, and the message.
 
-### Examples
+<!-- tabs:start -->
 
+### **200 OK**
 ```json
 {
-  "status": 200,
-  "data": true
+    "status": 200,
+    "data": true
 }
 ```
+
+### **Missing Argument**
 ```json
 {
-  "status": 400,
-  "error": "MissingRequiredArgumentException",
-  "message": "Argument 'username' is missing"
+    "status": 400,
+    "error": "MissingRequiredArgumentException",
+    "message": "Argument 'username' is missing"
 }
 ```
+
+### **Custom Exception**
+
 ```json
 {
     "status": 500,
@@ -379,22 +458,30 @@ If a exception has been thrown, it contains the error code, the exception class 
 }
 ```
 
-### Error Handling
+<!-- tabs:end -->
 
-The API Server will automatically throw a 500 error if:
+### Exception Handling
+
+The Server will automatically throw an exception and return a 500 error response if:
+* The requested route cannot be found
+* The server cannot find the specified client
+* The server cannot instantiate the specified class
+* The requested method cannot be found in the specified class
 * A required argument is missing
-* A requested route cannot be found
-* The server cannot find a specified client
-* The server cannot instantiate a specified class
-* The requested method cannot be found in a specified class
 
-Additionally, you can throw your own errors by simply calling
+The following illustrates the expected response when you throw an exception:
+
+<!-- panels:start -->
+<!-- div:left-panel -->
+
+#### Exception
 ```php
 throw new \Exception('My custom error');
 ```
 
-which will result in 
+<!-- div:right-panel -->
 
+#### Example Response
 ```json
 {
   "status": 500,
@@ -403,73 +490,81 @@ which will result in
 }
 ```
 
-or 
+<!-- panels:end -->
 
+<!-- panels:start -->
+<!-- div:left-panel -->
+
+#### Exception
 ```php
-throw new \Exception('Another error', 123);
+throw new \InvalidArgumentException('Another error', 123);
 ```
 
-which will result in
+<!-- div:right-panel -->
 
+#### Example Response
 ```json
 {
   "status": 123,
-  "error": "Exception",
+  "error": "InvalidArgumentException",
   "message": "Another error"
 }
 ```
 
-Alternatively, you can provide your own error handler by using the [`setExceptionHandler()`](phpdoc/#serversetexceptionhandler) method.
+<!-- panels:end -->
+
+#### Custom Exception Handler
+
+You can alternatively provide your own exception handler by using the [`setExceptionHandler()`](phpdoc/#serversetexceptionhandler) method.
 
 ```php
 // Overwrite error messages based on code
-$server->setExceptionHandler(function(\Exception $e) use ($server) {
-    $code = $e->getCode();
-    $switch ($code) {
-        case 400:
-            $message = 'Bad Request';
-            break;
-        case 404:
-            $message = 'Not Found';
-            break;
-        case 500:
-            $message = 'Internal Server Error';
-            break;
-        default:
-            $message = $e->getMessage();
+$server->setExceptionHandler(function(\Exception $ex) use ($server) {
+    $message = match($ex->getCode()) {
+        400 => 'Bad Request',
+        404 => 'Not Found',
+        500 => 'Internal Server Error',
+        default => $ex->getMessage()
     }
     
-    $server->getClient()->sendResponse($code, array(
-        'status' => $code,
-        'error' => get_class($e),
+    $server->getClient()->sendResponse([
+        'status' => $ex->getCode(),
+        'error' => get_class($ex),
         'message' => $message
-    ));
-})
+    ], $code);
+});
 ```
 
 ### Debugging
 
 For verbose error messages, enable debug mode on the desired controller by using the [`setDebugMode(true)`](phpdoc/#serversetdebugmode)` method:
 
+<!-- panels:start -->
+<!-- div:left-panel -->
+
+#### Example
 ```php
-Server::create('/', 'myRestApi\Admin')
+Server::create('/', MyRestApi\Admin::class)
     ->setDebugMode(true)
     ->collectRoutes()
-->run();
+    ->run();
 ```
 
-This will result in messages like:
+<!-- div:right-panel -->
 
+#### Example Response
 ```json
 {
     "status": 500,
     "error": "InvalidLoginException",
     "message": "Login is invalid or no access",
     "line": 10,
-    "file": "libs/RestAPI/Admin.class.php",
-    "trace": <debugTrace>
+    "file": "libs/MyRestApi/Admin.class.php",
+    "trace": ...
 }
 ```
+
+<!-- panels:end -->
 
 ## License
 

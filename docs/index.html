@@ -1,37 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>PHP REST Service</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-    <meta name="description" content="Description">
+    <meta name="description" content="PHP REST Service is a very simple and fast PHP class for server-side RESTful JSON APIs.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-    <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
-    <link rel="stylesheet" media="(prefers-color-scheme: light)" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
+    <link rel="stylesheet" media="(prefers-color-scheme: light)" href="https://unpkg.com/docsify-themeable@0/dist/css/theme-simple.css">
+    <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://unpkg.com/docsify-themeable@0/dist/css/theme-simple-dark.css">
     <style>
         @media (prefers-color-scheme: dark) {
             :root {
-                --theme-color   : white;
+                --theme-color: white;
             }
         }
         @media (prefers-color-scheme: light) {
             :root {
-                --theme-color   : #42b983;
+                --theme-color: #42b983;
             }
+        }
+        :root {
+            --docsify-example-panels-document-width: 100%; /* Remove margins */
+            --docsify-example-panels-left-panel-width: 50%;
+            --docsify-example-panels-right-panel-width: 50%;
         }
     </style>
 </head>
-
 <body>
-    <div id="app"></div>
+    <main id="app"></main>
     <script>
         window.$docsify = {
-            name: 'PHP REST Service',
-            repo: 'https://github.com/d-miles/php-rest-service',
+            name: 'PHP REST Service <!--CURRENT_VERSION--><!--END CURRENT_VERSION-->',
+            nameLink: 'https://github.com/d-miles/php-rest-service',
+            repo: 'd-miles/php-rest-service',
             loadSidebar: true,
             search: {
-                paths: ['/',
+                paths: [
+                    '/',
                     'phpdoc/'
                 ],
                 depth: 4,
@@ -39,14 +44,15 @@
         }
     </script>
     <!-- Docsify v4 -->
-    <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
-    <script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
-    <script src="//unpkg.com/prismjs/components/prism-json.min.js"></script>
-    <script src="//unpkg.com/prismjs/components/prism-php.min.js"></script>
-    <script src="//unpkg.com/prismjs/components/prism-apacheconf.min.js"></script>
-    <script src="//unpkg.com/prismjs/components/prism-regex.min.js"></script>
+    <script src="https://unpkg.com/docsify@4"></script>
+    <script src="https://unpkg.com/docsify@4/lib/plugins/search.min.js"></script>
+    <script src="https://unpkg.com/docsify-themeable@0"></script>
     <script src="https://unpkg.com/docsify-copy-code@2"></script>
+    <script src="https://unpkg.com/docsify-tabs@1"></script>
+    <script src="https://unpkg.com/docsify-example-panels@1"></script>
+    <script src="https://unpkg.com/prismjs/components/prism-json.min.js"></script>
+    <script src="https://unpkg.com/prismjs/components/prism-php.min.js"></script>
+    <script src="https://unpkg.com/prismjs/components/prism-apacheconf.min.js"></script>
+    <script src="https://unpkg.com/prismjs/components/prism-regex.min.js"></script>
 </body>
-
 </html>
