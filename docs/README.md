@@ -537,7 +537,7 @@ $server->setExceptionHandler(function(\Exception $ex) use ($server) {
 
 ### Debugging
 
-For verbose error messages, enable debug mode on the desired controller by using the [`setDebugMode(true)`](phpdoc/#serversetdebugmode)` method:
+For verbose error messages, enable debug mode on the desired controller by using the [`setDebugMode(true)`](phpdoc/#serversetdebugmode) method:
 
 <!-- panels:start -->
 <!-- div:left-panel -->

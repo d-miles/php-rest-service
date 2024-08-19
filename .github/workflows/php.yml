@@ -26,7 +26,6 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
-        #php-versions: ['8.1', '8.2', '8.3', '8.4']
         php-versions: ${{ fromJSON(needs.supported-php-versions.outputs.php-versions) }}
         
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
@@ -80,21 +79,23 @@ jobs:
     - name: Generate phpDoc
       run: composer run-script phpdoc
     
-    - uses: actions/github-script@v6
+    - name: Set replacement key/values
+      uses: actions/github-script@v6
       id: replacements
       with:
         script: |
+          const versions = ${{ needs.supported-php-versions.outputs.php-versions }}.map(x => x.toString());
           return {
             CURRENT_VERSION: '${{ github.ref_name }}',
-            MIN_PHP_VERSION: `${(${{ needs.supported-php-versions.outputs.php-versions }})[0]}`,
-            TESTED_PHP_VERSIONS: ${{ needs.supported-php-versions.outputs.php-versions }}.join(', '),
+            MIN_PHP_VERSION: versions.slice(0, 1),
+            TESTED_PHP_VERSIONS: `${versions.slice(0, versions.length - 1).join(', ')}, and ${versions.slice(-1)}`,
           };
     
-    - name: replacements
+    - name: Interpolate markdown files
       uses: austenstone/markdown-interpolation-action@v2
       with:
         values: ${{ steps.replacements.outputs.result }}
-        files-regex: docs\/.*\.(md|html?)
+        files-regex: .*\.(md|htm|html)
       
     - name: Upload GitHub Pages artifact
       uses: actions/upload-pages-artifact@v3
