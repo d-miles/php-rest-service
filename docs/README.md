@@ -74,7 +74,7 @@ Each of these methods has the following signature:
 function (string $path, callable $callbackFn)
 ```
 
-Alternatively, you could also use [`addRoute()`](phpdoc/#serveraddroute) to add a route for a specific HTTP method, or omit the `$method` argument altogether to add a route for _all_ HTTP methods:
+Alternatively, you could also use [`addRoute()`](phpdoc/#serveraddroute) to add a route for a specific HTTP method, or omit the [`$method` php] argument altogether to add a route for _all_ HTTP methods:
 ```php
 function addRoute(string $path, callable $callbackFn, string $method = '_all_')
 ```
@@ -85,8 +85,7 @@ With automatic endpoint generation, you can supply a PHP class that contains end
 
 Function names will be converted from camel-case to dash-case. eg. `getFooBar()` will be converted to `/foo-bar`.
 
-You can also bind a function to a route other than the function name. Simply use the `@url` PHPDoc annotation to define the route.
-For example, `@url /foo-bar` will bind the function to the same route as `getFooBar()`.
+You can also bind a function to a route other than the function name. Simply use the `@url` PHPDoc annotation to define the route. For example, `@url /foo-bar` will bind the function to the same route as `getFooBar()` would.
 
 <!-- div:right-panel -->
 
@@ -263,10 +262,9 @@ Server::create('test')
 
 #### Custom Response Formatters
 
-You can also define your own response formatters using the [`setCustomFormat()`](phpdoc/#clientsetcustomformat) method along with the [`setFormat()`](phpdoc/#clientsetformat) method. The formatting function will be called with a single argument, an associative array of the response data.
+You can also define your own response formatters using the [`setCustomFormat()`](phpdoc/#clientsetcustomformat) method along with the [`setFormat()`](phpdoc/#clientsetformat) method. The response formatting function will be called with a single argument, [`$message` php], which is an associative array representing the response data to be serialized:
 
-For example:
-```
+```php
 [
     'status' => 'success',
     'data' => 'Hello World!'
@@ -484,9 +482,9 @@ throw new \Exception('My custom error');
 #### Example Response
 ```json
 {
-  "status": 500,
-  "error": "Exception",
-  "message": "My custom error"
+    "status": 500,
+    "error": "Exception",
+    "message": "My custom error"
 }
 ```
 
@@ -505,9 +503,9 @@ throw new \InvalidArgumentException('Another error', 123);
 #### Example Response
 ```json
 {
-  "status": 123,
-  "error": "InvalidArgumentException",
-  "message": "Another error"
+    "status": 123,
+    "error": "InvalidArgumentException",
+    "message": "Another error"
 }
 ```
 
