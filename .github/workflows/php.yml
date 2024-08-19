@@ -87,7 +87,7 @@ jobs:
           const versions = ${{ needs.supported-php-versions.outputs.php-versions }}.map(x => x.toString());
           return {
             CURRENT_VERSION: '${{ github.ref_name }}',
-            MIN_PHP_VERSION: versions.slice(0, 1),
+            MIN_PHP_VERSION: versions.slice(0, 1).join(''),
             TESTED_PHP_VERSIONS: `${versions.slice(0, versions.length - 1).join(', ')}, and ${versions.slice(-1)}`,
           };
     
