@@ -21,13 +21,12 @@ jobs:
         script: |
           core.startGroup('get replacements');
             const versions = [8.1, 8.2, 8.3].map(x => x.toString());
-            core.info(versions);
             const placeholders = {
               CURRENT_VERSION: '${{ github.ref_name }}',
               MIN_PHP_VERSION: versions.slice(0, 1).join(''),
               TESTED_PHP_VERSIONS: `${versions.slice(0, versions.length - 1).join(', ')}, and ${versions.slice(-1)}`,
             };
-            core.info(placeholders);
+            core.info(JSON.stringify(placeholders));
           core.endGroup();
           
           core.startGroup('get files');
@@ -50,7 +49,7 @@ jobs:
                 let match;
                 while (match = regex.exec(data)) {
                   const [replace, key] = match;
-                  if (key in replacements) {
+                  if (key in placeholders) {
                     if (replace in replacements)
                       continue;
                     
