@@ -79,14 +79,14 @@ jobs:
     - name: Generate phpDoc
       run: composer run-script phpdoc
     
-    - name: Set replacement key/values
+    - name: Update documentation files with build information
       uses: actions/github-script@v7
       id: replacements
       with:
         script: |
           
           core.startGroup('set placeholders');
-            const versions = ${{ needs.supported-php-versions.outputs.php-versions }}.map(x => x.toString());
+            const versions = ${{ needs.supported-php-versions.outputs.php-versions }}.sort().map(x => x.toString());
             const placeholders ={
               CURRENT_VERSION: '${{ github.ref_name }}',
               MIN_PHP_VERSION: versions.slice(0, 1).join(''),
