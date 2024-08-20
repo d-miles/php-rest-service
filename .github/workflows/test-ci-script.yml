@@ -54,7 +54,7 @@ jobs:
                       continue;
                     
                     replacements[replace] = placeholders[key];
-                    core.info(`\t${replace} => ${replacements[key]}`);
+                    core.info(`\t${replace} => ${placeholders[key]}`);
                   } else {
                     core.warning(`Found ${key} in ${file}, but no matching key in replacements`);
                   }
@@ -72,7 +72,7 @@ jobs:
                       return;
                     }
                     
-                    core.info(`\t${replacements.length} replacements made in ${file}`);
+                    core.info(`\t${Object.entries(replacements).length} replacements made in ${file}`);
                   });
                 }
               });
