@@ -109,12 +109,12 @@ class Client {
     /**
      * Create a new client.
      * 
-     * @param Server $pServerController The server controller.
+     * @param Server $serverController The server controller.
      * @return void
      */
-    public function __construct($pServerController)
+    public function __construct($serverController)
     {
-        $this->controller = $pServerController;
+        $this->controller = $serverController;
         if (isset($_SERVER['PATH_INFO']))
             $this->setURL($_SERVER['PATH_INFO']);
 
@@ -124,12 +124,12 @@ class Client {
     /**
      * Attach client to different controller.
      * 
-     * @param Server $pServerController Server controller.
+     * @param Server $serverController Server controller.
      * @return void
      */
-    public function setController($pServerController)
+    public function setController($serverController)
     {
-        $this->controller = $pServerController;
+        $this->controller = $serverController;
     }
 
     /**
@@ -145,11 +145,11 @@ class Client {
     /**
      * Set the custom formatting function/method.
      * 
-     * @param  callable $pFn    The custom formatting function/method. Arguments: (string $message)
-     * @return Client           The client instance.
+     * @param  callable $fn The custom formatting function/method. Arguments: (string $message)
+     * @return Client       The client instance.
      */
-    public function setCustomFormat($pFn) {
-        $this->customFormat = $pFn;
+    public function setCustomFormat($fn) {
+        $this->customFormat = $fn;
 
         return $this;
     }
@@ -166,42 +166,42 @@ class Client {
     /**
      * Sends the actual response.
      * 
-     * @param string $pHttpCode The HTTP code to return.
-     * @param $pMessage The data to return.
+     * @param array $message The data to return.
+     * @param string $httpCode The HTTP code to return.
      * @return void
      */
-    public function sendResponse($pMessage, $pHttpCode = '200', $unescape = 0)
+    public function sendResponse($message, $httpCode = '200', $unescape = 0)
     {
         $suppressStatusCode = isset($_GET['_suppress_status_code']) ? $_GET['_suppress_status_code'] : false;
         if ($this->controller->getHttpStatusCodes() &&
             !$suppressStatusCode &&
             php_sapi_name() !== 'cli') {
 
-            $status = self::$statusCodes[intval($pHttpCode)];
-            header('HTTP/1.0 ' . ($status ? $pHttpCode . ' ' . $status : $pHttpCode), true, $pHttpCode);
+            $status = self::$statusCodes[intval($httpCode)];
+            header('HTTP/1.0 ' . ($status ? $httpCode . ' ' . $status : $httpCode), true, $httpCode);
         } elseif (php_sapi_name() !== 'cli') {
             header('HTTP/1.0 200 OK');
         }
 
-        $pMessage = array_reverse($pMessage, true);
-        $pMessage['status'] = intval($pHttpCode);
-        $pMessage = array_reverse($pMessage, true);
+        $message = array_reverse($message, true);
+        $message['status'] = intval($httpCode);
+        $message = array_reverse($message, true);
 
         $method = $this->getOutputFormatMethod($this->getOutputFormat());
         if ($method == 'customFormat' && $this->customFormat == null) {
-            echo $this->asJSON($pMessage, $unescape);
+            echo $this->asJSON($message, $unescape);
         } else if ($method == 'customFormat' && $this->customFormat != null) {
-            $args = [$pMessage];
+            $args = [$message];
             $result = call_user_func_array($this->getCustomFormat(), $args);
             $this->setContentLength($result);
 
             echo $result;
         } else {
             if ($method == "asJSON" || $method == "json") {
-                echo $this->asJSON($pMessage, $unescape);
+                echo $this->asJSON($message, $unescape);
             }
             else {
-                echo $this->$method($pMessage);
+                echo $this->$method($message);
             }
         }
         exit;
@@ -210,12 +210,12 @@ class Client {
     /**
      * Returns the current output format method
      * 
-     * @param  string $pFormat The output format. 'json', 'xml', 'text', or 'custom'.
+     * @param  string $format The output format. 'json', 'xml', 'text', or 'custom'.
      * @return string 'asJSON', 'asXML', 'asText', or 'customFormat'.
      */
-    public function getOutputFormatMethod($pFormat)
+    public function getOutputFormatMethod($format)
     {
-        return $this->outputFormats[$pFormat];
+        return $this->outputFormats[$format];
     }
 
     /**
@@ -259,15 +259,15 @@ class Client {
     /**
      * Sets a custom http method.
      * 
-     * @param  string $pMethod  The request method.
+     * @param  string $method   The request method.
      * @return Client           Client instance.
      */
-    public function setMethod($pMethod) {
-        $pMethod = strtolower($pMethod);
-        if (!in_array($pMethod, $this->methods))
-            $pMethod = 'get';
+    public function setMethod($method) {
+        $method = strtolower($method);
+        if (!in_array($method, $this->methods))
+            $method = 'get';
         
-        $this->method = $pMethod;
+        $this->method = $method;
         
         return $this;
     }
@@ -275,27 +275,27 @@ class Client {
     /**
      * Set header "Content-Length" from data.
      * 
-     * @param mixed $pMessage The data to set the header from.
+     * @param mixed $message The data to set the header from.
      * @return void
      */
-    public function setContentLength($pMessage) {
+    public function setContentLength($message) {
         if (php_sapi_name() !== 'cli' )
-            header('Content-Length: '.strlen($pMessage));
+            header('Content-Length: ' . strlen($message));
     }
     
     /**
      * Converts data to pretty JSON.
      * 
-     * @param mixed $pMessage The data to convert.
+     * @param mixed $message The data to convert.
      * @return string JSON version of the original data.
      */
-    public function asJSON($pMessage, $unescape = 0) {
+    public function asJSON($message, $unescape = 0) {
         if (php_sapi_name() !== 'cli' )
             header('Content-Type: application/json; charset=utf-8');
         
-        $json = !is_string($pMessage)
-                    ? json_encode($pMessage, $unescape ? JSON_UNESCAPED_SLASHES : 0)
-                    : $pMessage;
+        $json = !is_string($message)
+                    ? json_encode($message, $unescape ? JSON_UNESCAPED_SLASHES : 0)
+                    : $message;
         
         $result      = '';
         $pos         = 0;
@@ -355,30 +355,30 @@ class Client {
     /**
      * Converts data to XML.
      * 
-     * @param mixed $pMessage The data to convert.
-     * @param string $pParentTagName The name of the parent tag. Default is ''.
-     * @param int $pDepth The depth of the current tag. Default is 1.
-     * @param bool $pHeader Whether to wrap the xml in a header. Default is true.
+     * @param mixed $message The data to convert.
+     * @param string $parentTagName The name of the parent tag. Default is ''.
+     * @param int $depth The depth of the current tag. Default is 1.
+     * @param bool $header Whether to wrap the xml in a header. Default is true.
      * @return string XML version of the original data.
      */
-    public function asXML($pMessage, $pParentTagName = '', $pDepth = 1, $pHeader = true) {
-        if (is_array($pMessage)) {
+    public function asXML($message, $parentTagName = '', $depth = 1, $header = true) {
+        if (is_array($message)) {
             $content = '';
 
-            foreach ($pMessage as $key => $data) {
-                $key = is_numeric($key) ? $pParentTagName.'-item' : $key;
-                $content .= str_repeat('  ', $pDepth)
+            foreach ($message as $key => $data) {
+                $key = is_numeric($key) ? $parentTagName.'-item' : $key;
+                $content .= str_repeat('  ', $depth)
                     .'<'.htmlspecialchars($key).'>'.
-                    $this->asXml($data, $key, $pDepth+1, false)
+                    $this->asXml($data, $key, $depth+1, false)
                     .'</'.htmlspecialchars($key).">\n";
             }
 
             $xml = $content;
         } else {
-            $xml = htmlspecialchars($pMessage);
+            $xml = htmlspecialchars($message);
         }
 
-        if ($pHeader) {
+        if ($header) {
             $xml = "<?xml version=\"1.0\"?>\n<response>\n$xml</response>\n";
             $this->setContentLength($xml);
         }
@@ -389,15 +389,15 @@ class Client {
     /**
      * Converts data to text.
      * 
-     * @param mixed $pMessage The data to convert.
+     * @param mixed $message The data to convert.
      * @return string JSON version of the original data.
      */
-    public function asText($pMessage) {
+    public function asText($message) {
         if (php_sapi_name() !== 'cli' )
             header('Content-Type: text/plain; charset=utf-8');
 
         $text = '';
-        foreach ($pMessage as $key => $data) {
+        foreach ($message as $key => $data) {
             $key = is_numeric($key) ? '' : $key.': ';
             $text .= $key.$data."\n";
         }
@@ -409,11 +409,11 @@ class Client {
     /**
      * Set the current output format.
      * 
-     * @param  string $pFormat  Name of the format.
+     * @param  string $format   Name of the format.
      * @return Client           Client instance.
      */
-    public function setFormat($pFormat) {
-        $this->outputFormat = $pFormat;
+    public function setFormat($format) {
+        $this->outputFormat = $format;
 
         return $this;
     }
@@ -430,11 +430,11 @@ class Client {
     /**
      * Set the current endpoint URL.
      * 
-     * @param  string $pUrl The new endpoint URL.
+     * @param  string $url  The new endpoint URL.
      * @return Client       Client instance.
      */
-    public function setURL($pUrl) {
-        $this->url = $pUrl;
+    public function setURL($url) {
+        $this->url = $url;
 
         return $this;
     }
@@ -457,7 +457,7 @@ class Client {
 
         // If URL is null, set to ''
         $urlFormat = $this->getURL();
-        if ($urlFormat == null) {
+        if ($urlFormat === null) {
             $urlFormat = '';
         }
 

@@ -151,7 +151,7 @@ class OpenApiController {
      */
     protected function generateOpenApiRoutes(Server $server) {
         $url = $server->getTriggerUrl();
-        $pUri = null;
+        $uri = null;
         $format = $this->server->getClient()->getOutputFormat();
         $routes = [];
         
@@ -160,7 +160,7 @@ class OpenApiController {
             
             $matches = [];
             
-            if (!$pUri || ($pUri && preg_match('|^'.$routeUri.'$|', $pUri, $matches))) {
+            if (!$uri || ($uri && preg_match('|^'.$routeUri.'$|', $uri, $matches))) {
                 
                 if ($matches) {
                     array_shift($matches);

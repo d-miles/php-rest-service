@@ -14,18 +14,18 @@ class InternalClient extends Client {
     /**
      * Sends the actual response.
      * 
-     * @param mixed $pMessage The data to process.
-     * @param string $pHttpCode The HTTP code to process.
+     * @param mixed $message The data to process.
+     * @param string $httpCode The HTTP code to process.
      * @return string HTTP method of current request.
      */
-    public function sendResponse($pMessage, $pHttpCode = '200', $unescape = 0) {
-        $pMessage = array_reverse($pMessage, true);
-        $pMessage['status'] = $pHttpCode+0;
-        $pMessage = array_reverse($pMessage, true);
+    public function sendResponse($message, $httpCode = '200', $unescape = 0) {
+        $message = array_reverse($message, true);
+        $message['status'] = (int)$httpCode;
+        $message = array_reverse($message, true);
 
         $method = $this->getOutputFormatMethod($this->getOutputFormat());
 
-        return $this->$method($pMessage);
+        return $this->$method($message);
     }
 
 }

@@ -156,55 +156,55 @@ class Server
     /**
      * Create a new server.
      * 
-     * @param string              $pTriggerUrl The URL that triggers the controller.
-     * @param string|object       $pControllerClass The default endpoint function class.
-     * @param Server $pParentController The parent controller.
+     * @param string        $triggerUrl The URL that triggers the controller.
+     * @param string|object $controllerClass The default endpoint function class.
+     * @param Server        $parentController The parent controller.
      * @return void
      */
-    public function __construct(string $pTriggerUrl, string|object|null $pControllerClass = null, ?Server $pParentController = null) {
-        $this->normalizeUrl($pTriggerUrl);
+    public function __construct(string $triggerUrl, string|object|null $controllerClass = null, ?Server $parentController = null) {
+        $this->normalizeUrl($triggerUrl);
 
-        if ($pParentController) {
-            $this->parentController = $pParentController;
-            $this->setClient($pParentController->getClient());
+        if ($parentController) {
+            $this->parentController = $parentController;
+            $this->setClient($parentController->getClient());
             
-            if ($pParentController->getCheckAccess())
-                $this->setCheckAccess($pParentController->getCheckAccess());
+            if ($parentController->getCheckAccess())
+                $this->setCheckAccess($parentController->getCheckAccess());
             
-            if ($pParentController->getExceptionHandler())
-                $this->setExceptionHandler($pParentController->getExceptionHandler());
+            if ($parentController->getExceptionHandler())
+                $this->setExceptionHandler($parentController->getExceptionHandler());
 
-            if ($pParentController->getDebugMode())
-                $this->setDebugMode($pParentController->getDebugMode());
+            if ($parentController->getDebugMode())
+                $this->setDebugMode($parentController->getDebugMode());
 
-            if ($pParentController->getDescribeRoutes())
-                $this->setDescribeRoutes($pParentController->getDescribeRoutes());
+            if ($parentController->getDescribeRoutes())
+                $this->setDescribeRoutes($parentController->getDescribeRoutes());
 
-            if ($pParentController->getControllerFactory())
-                $this->setControllerFactory($pParentController->getControllerFactory());
+            if ($parentController->getControllerFactory())
+                $this->setControllerFactory($parentController->getControllerFactory());
 
-            $this->setHttpStatusCodes($pParentController->getHttpStatusCodes());
+            $this->setHttpStatusCodes($parentController->getHttpStatusCodes());
 
         } else {
             $this->setClient(new Client($this));
         }
 
-        $this->setClass($pControllerClass);
-        $this->setTriggerUrl($pTriggerUrl);
+        $this->setClass($controllerClass);
+        $this->setTriggerUrl($triggerUrl);
     }
 
     /**
      * Creates controller factory. Used for internal testing.
      * 
-     * @param string $pTriggerUrl The URL that triggers the controller.
-     * @param string $pControllerClass The default endpoint function class.
+     * @param string $triggerUrl The URL that triggers the controller.
+     * @param string $controllerClass The default endpoint function class.
      * 
      * @return Server The server instance.
      */
-    public static function create($pTriggerUrl, $pControllerClass = '') {
+    public static function create($triggerUrl, $controllerClass = '') {
         $class = get_called_class();
         
-        return new $class($pTriggerUrl, $pControllerClass);
+        return new $class($triggerUrl, $controllerClass);
     }
 
     /**
@@ -292,11 +292,11 @@ class Server
     /**
      * Enable / Disable sending of HTTP status codes.
      * 
-     * @param  boolean $pWithStatusCode If true, send HTTP status codes.
+     * @param  boolean $withStatusCode  If true, send HTTP status codes.
      * @return Server                   The server instance.
      */
-    public function setHttpStatusCodes($pWithStatusCode) {
-        $this->withStatusCode = $pWithStatusCode;
+    public function setHttpStatusCodes($withStatusCode) {
+        $this->withStatusCode = $withStatusCode;
 
         return $this;
     }
@@ -313,11 +313,11 @@ class Server
     /**
      * Set the check access function/method.
      * 
-     * @param  callable $pFn    The check access function/method. Arguments: (string $url, string $routeUri, string $method, array $args)
-     * @return Server           The server instance.
+     * @param  callable $fn The check access function/method. Arguments: (string $url, string $routeUri, string $method, array $args)
+     * @return Server       The server instance.
      */
-    public function setCheckAccess($pFn) {
-        $this->checkAccessFn = $pFn;
+    public function setCheckAccess($fn) {
+        $this->checkAccessFn = $fn;
 
         return $this;
     }
@@ -334,11 +334,11 @@ class Server
     /**
      * Set fallback method if no route is found.
      * 
-     * @param  string $pMethodName  The fallback method.
+     * @param  string $methodName   The fallback method.
      * @return Server               The server instance.
      */
-    public function setFallbackMethod($pMethodName) {
-        $this->fallbackMethod = $pMethodName;
+    public function setFallbackMethod($methodName) {
+        $this->fallbackMethod = $methodName;
 
         return $this;
     }
@@ -356,11 +356,11 @@ class Server
      * Sets whether the service should serve route descriptions
      * through the OPTIONS method.
      * 
-     * @param  boolean $pDescribeRoutes If true, serve route descriptions.
+     * @param  boolean $describeRoutes  If true, serve route descriptions.
      * @return Server                   The server instance.
      */
-    public function setDescribeRoutes($pDescribeRoutes) {
-        $this->describeRoutes = $pDescribeRoutes;
+    public function setDescribeRoutes($describeRoutes) {
+        $this->describeRoutes = $describeRoutes;
 
         return $this;
     }
@@ -377,11 +377,11 @@ class Server
     /**
      * Send exception function/method. Will be fired if a route-method throws a exception.
      * 
-     * @param  callable $pFn    The exception function/method. Arguments: (\Exception $ex)
-     * @return Server           The server instance.
+     * @param  callable $fn The exception function/method. Arguments: (\Exception $ex)
+     * @return Server       The server instance.
      */
-    public function setExceptionHandler($pFn) {
-        $this->sendExceptionFn = $pFn;
+    public function setExceptionHandler($fn) {
+        $this->sendExceptionFn = $fn;
 
         return $this;
     }
@@ -398,11 +398,11 @@ class Server
     /**
      * If this is true, we send file, line and backtrace if an exception has been thrown.
      * 
-     * @param  boolean $pDebugMode  If true, send debug info.
+     * @param  boolean $debugMode   If true, send debug info.
      * @return Server               The server instance.
      */
-    public function setDebugMode($pDebugMode) {
-        $this->debugMode = $pDebugMode;
+    public function setDebugMode($debugMode) {
+        $this->debugMode = $debugMode;
 
         return $this;
     }
@@ -437,11 +437,11 @@ class Server
     /**
      * Set the URL that triggers the controller.
      * 
-     * @param $pTriggerUrl  The URL that triggers the controller.
+     * @param $triggerUrl   The URL that triggers the controller.
      * @return Server       The server instance.
      */
-    public function setTriggerUrl($pTriggerUrl) {
-        $this->triggerUrl = $pTriggerUrl;
+    public function setTriggerUrl($triggerUrl) {
+        $this->triggerUrl = $triggerUrl;
 
         return $this;
     }
@@ -458,15 +458,15 @@ class Server
     /**
      * Sets the client.
      * 
-     * @param  Client|string $pClient   The endpoint client.
+     * @param  Client|string $client    The endpoint client.
      * @return Server                   The server instance.
      */
-    public function setClient($pClient) {
-        if (is_string($pClient)) {
-            $pClient = new $pClient($this);
+    public function setClient($client) {
+        if (is_string($client)) {
+            $client = new $client($this);
         }
 
-        $this->client = $pClient;
+        $this->client = $client;
         $this->client->setupFormats();
 
         return $this;
@@ -484,17 +484,17 @@ class Server
     /**
      * Sends a 'Bad Request' response to the client.
      * 
-     * @param $pCode The HTTP status code.
-     * @param $pMessage The message to send.
+     * @param $code The HTTP status code.
+     * @param $message The message to send.
      * @throws \Exception If the client is not set.
      * @return string The response.
      */
-    public function sendBadRequest($pCode, $pMessage) {
-        if (is_object($pMessage) && property_exists($pMessage, 'xdebug_message')) 
-            $pMessage = $pMessage->xdebug_message;
+    public function sendBadRequest($code, $message) {
+        if (is_object($message) && property_exists($message, 'xdebug_message')) 
+            $message = $message->xdebug_message;
         $msg = [
-            'error' => $pCode, 
-            'message' => $pMessage
+            'error' => $code, 
+            'message' => $message
         ];
         if (!$this->getClient())
             throw new \Exception('client_not_found_in_ServerController');
@@ -504,17 +504,17 @@ class Server
     /**
      * Sends a 'Internal Server Error' response to the client.
      * 
-     * @param $pCode The HTTP status code.
-     * @param $pMessage The message to send.
+     * @param $code The HTTP status code.
+     * @param $message The message to send.
      * @throws \Exception If the client is not set.
      * @return string The response.
      */
-    public function sendError($pCode, $pMessage) {
-        if (is_object($pMessage) && property_exists($pMessage, 'xdebug_message'))
-            $pMessage = $pMessage->xdebug_message;
+    public function sendError($code, $message) {
+        if (is_object($message) && property_exists($message, 'xdebug_message'))
+            $message = $message->xdebug_message;
         $msg = [
-            'error' => $pCode,
-            'message' => $pMessage
+            'error' => $code,
+            'message' => $message
         ];
         if (!$this->getClient())
             throw new \Exception('client_not_found_in_ServerController');
@@ -524,36 +524,36 @@ class Server
     /**
      * Sends a exception response to the client.
      * 
-     * @param $pException The exception to send.
+     * @param \Exception $exception The exception to send.
      * @throws \Exception If the client is not set.
      * @return void
      */
-    public function sendException($pException) {
+    public function sendException(\Exception $exception) {
         if ($this->sendExceptionFn) {
             if ($this->sendExceptionFn instanceof \Closure) {
-                $this->sendExceptionFn->call($this->controller, $pException);
+                $this->sendExceptionFn->call($this->controller, $exception);
             } else {
-                call_user_func_array($this->sendExceptionFn, [$pException]);
+                call_user_func_array($this->sendExceptionFn, [$exception]);
             }
         }
         
-        $message = $pException->getMessage();
+        $message = $exception->getMessage();
         if (is_object($message) && property_exists($message, 'xdebug_message'))
             $message = $message->xdebug_message;
 
         $msg = [
-            'error' => get_class($pException),
+            'error' => get_class($exception),
             'message' => $message
         ];
 
         $code = '500';
-        if ($pException->getCode() != 0)
-            $code = $pException->getCode();
+        if ($exception->getCode() != 0)
+            $code = $exception->getCode();
 
         if ($this->debugMode) {
-            $msg['file'] = $pException->getFile();
-            $msg['line'] = $pException->getLine();
-            $msg['trace'] = $pException->getTraceAsString();
+            $msg['file'] = $exception->getFile();
+            $msg['line'] = $exception->getLine();
+            $msg['trace'] = $exception->getTraceAsString();
         }
 
         if (!$this->getClient())
@@ -564,13 +564,13 @@ class Server
     /**
      * Adds a new route for all http methods (get, post, put, delete, options, head, patch).
      * 
-     * @param  string          $pUri        The uri to match.
-     * @param  callable|string $pCb         The method name of the passed controller or a php callable.
-     * @param  string          $pHttpMethod If you want to limit to a HTTP method.
+     * @param  string          $uri         The uri to match.
+     * @param  callable|string $cb          The method name of the passed controller or a php callable.
+     * @param  string          $httpMethod  If you want to limit to a HTTP method.
      * @return Server                       The server instance.
      */
-    public function addRoute($pUri, $pCb, $pHttpMethod = '_all_') {
-        $this->routes[$pUri][ $pHttpMethod ] = $pCb;
+    public function addRoute($uri, $cb, $httpMethod = '_all_') {
+        $this->routes[$uri][$httpMethod] = $cb;
 
         return $this;
     }
@@ -578,12 +578,12 @@ class Server
     /**
      * Same as addRoute, but limits to GET.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addGetRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'get');
+    public function addGetRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'get');
 
         return $this;
     }
@@ -591,12 +591,12 @@ class Server
     /**
      * Same as addRoute, but limits to POST.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addPostRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'post');
+    public function addPostRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'post');
 
         return $this;
     }
@@ -604,12 +604,12 @@ class Server
     /**
      * Same as addRoute, but limits to PUT.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addPutRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'put');
+    public function addPutRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'put');
 
         return $this;
     }
@@ -617,12 +617,12 @@ class Server
     /**
      * Same as addRoute, but limits to PATCH.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addPatchRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'patch');
+    public function addPatchRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'patch');
 
         return $this;
     }
@@ -630,12 +630,12 @@ class Server
     /**
      * Same as addRoute, but limits to HEAD.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addHeadRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'head');
+    public function addHeadRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'head');
 
         return $this;
     }
@@ -643,12 +643,12 @@ class Server
     /**
      * Same as addRoute, but limits to OPTIONS.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addOptionsRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'options');
+    public function addOptionsRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'options');
 
         return $this;
     }
@@ -656,12 +656,12 @@ class Server
     /**
      * Same as addRoute, but limits to DELETE.
      * 
-     * @param  string          $pUri    The uri to match.
-     * @param  callable|string $pCb     The method name of the passed controller or a php callable.
+     * @param  string          $uri     The uri to match.
+     * @param  callable|string $cb      The method name of the passed controller or a php callable.
      * @return Server                   The server instance.
      */
-    public function addDeleteRoute($pUri, $pCb) {
-        $this->addRoute($pUri, $pCb, 'delete');
+    public function addDeleteRoute($uri, $cb) {
+        $this->addRoute($uri, $cb, 'delete');
 
         return $this;
     }
@@ -669,11 +669,11 @@ class Server
     /**
      * Removes a route.
      * 
-     * @param  string   $pUri   The uri to match.
+     * @param  string   $uri    The uri to match.
      * @return Server           The server instance.
      */
-    public function removeRoute($pUri) {
-        unset($this->routes[$pUri]);
+    public function removeRoute($uri) {
+        unset($this->routes[$uri]);
 
         return $this;
     }
@@ -681,14 +681,14 @@ class Server
     /**
      * Sets the controller class to use for function endpoints.
      * 
-     * @param   string|object   $pClass The class name or object.
+     * @param   string|object $class The class name or object.
      * @return  void
      */
-    public function setClass($pClass) {
-        if (is_string($pClass)) {
-            $this->createControllerClass($pClass);
-        } elseif (is_object($pClass)) {
-            $this->controller = $pClass;
+    public function setClass($class) {
+        if (is_string($class)) {
+            $this->createControllerClass($class);
+        } elseif (is_object($class)) {
+            $this->controller = $class;
         } else {
             $this->controller = $this;
         }
@@ -697,22 +697,22 @@ class Server
     /**
      * Setup the controller class.
      * 
-     * @param  string       $pClassName
+     * @param  string       $className
      * @throws \Exception   If the class does not exist.
      */
-    protected function createControllerClass($pClassName) {
-        if ($pClassName != '') {
+    protected function createControllerClass($className) {
+        if ($className != '') {
             try {
                 if ($this->controllerFactory) {
-                    $this->controller = call_user_func_array($this->controllerFactory, [$pClassName, $this]);
+                    $this->controller = call_user_func_array($this->controllerFactory, [$className, $this]);
                 } else {
-                    $this->controller = new $pClassName($this);
+                    $this->controller = new $className($this);
                 }
                 if ($this->controller instanceof static) {
                     $this->controller->setClient($this->getClient());
                 }
             } catch (\Exception $e) {
-                throw new \Exception('Error during initialisation of '.$pClassName.': '.$e, 0, $e);
+                throw new \Exception('Error during initialisation of ' . $className . ': ' . $e, 0, $e);
             }
         } else {
             $this->controller = $this;
@@ -722,18 +722,18 @@ class Server
     /**
      * Attach a sub controller to this controller.
      * 
-     * @param string    $pTriggerUrl        The url to trigger the sub controller.
-     * @param mixed     $pControllerClass   A class name (autoloader required) or an instance of a class.
+     * @param string    $triggerUrl         The url to trigger the sub controller.
+     * @param mixed     $controllerClass    A class name (autoloader required) or an instance of a class.
      * @return Server                       A newly-created Server controller. Use done() to switch the context back to the parent.
      */
-    public function addSubController($pTriggerUrl, $pControllerClass = '') {
-        $this->normalizeUrl($pTriggerUrl);
+    public function addSubController($triggerUrl, $controllerClass = '') {
+        $this->normalizeUrl($triggerUrl);
 
         $base = $this->triggerUrl;
         if ($base == '/')
             $base = '';
 
-        $controller = new Server($base . $pTriggerUrl, $pControllerClass, $this);
+        $controller = new Server($base . $triggerUrl, $controllerClass, $this);
 
         $this->controllers[] = $controller;
 
@@ -741,40 +741,40 @@ class Server
     }
 
     /**
-     * Normalize $pUrl by trimming the trailing slash.
+     * Normalize $url by trimming the trailing slash.
      * 
-     * @param  string $pUrl The url to normalize.
+     * @param  string $url The url to normalize.
      * @return void
      */
-    public function normalizeUrl(&$pUrl) {
-        if ('/' === $pUrl)
+    public function normalizeUrl(&$url) {
+        if ('/' === $url)
             return;
-        if ($pUrl != null) {
-            if (substr($pUrl, -1) == '/')
-                $pUrl = substr($pUrl, 0, -1);
-            if (substr($pUrl, 0, 1) != '/')
-                $pUrl = '/' . $pUrl;
+        if ($url != null) {
+            if (substr($url, -1) === '/')
+                $url = substr($url, 0, -1);
+            if (substr($url, 0, 1) !== '/')
+                $url = '/' . $url;
         }
     }
 
     /**
      * Sends data to the client with 200 http code.
      * 
-     * @param $pData The data to send.
+     * @param $data The data to send.
      * @return void
      */
-    public function send($pData, $unescape = 0) {
-        return $this->getClient()->sendResponse(['data' => $pData], 200, $unescape);
+    public function send($data, $unescape = 0) {
+        return $this->getClient()->sendResponse(['data' => $data], 200, $unescape);
     }
 
     /**
      * Convert string from camel case to dashes.
      * 
-     * @param  string $pValue The string to convert.
+     * @param  string $value The string to convert.
      * @return string The converted string.
      */
-    public function camelCase2Dashes($pValue) {
-        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $pValue));
+    public function camelCase2Dashes($value) {
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $value));
     }
 
     /**
@@ -824,17 +824,17 @@ class Server
     /**
      * Simulates a HTTP Call.
      * 
-     * @param  string $pUri     The uri to call.
-     * @param  string $pMethod  The HTTP Method
+     * @param  string $uri      The uri to call.
+     * @param  string $method   The HTTP Method
      * @return string           The response.
      */
-    public function simulateCall($pUri, $pMethod = 'get') {
-        if (($idx = strpos($pUri, '?')) !== false) {
-            parse_str(substr($pUri, $idx+1), $_GET);
-            $pUri = substr($pUri, 0, $idx);
+    public function simulateCall($uri, $method = 'get') {
+        if (($idx = strpos($uri, '?')) !== false) {
+            parse_str(substr($uri, $idx+1), $_GET);
+            $uri = substr($uri, 0, $idx);
         }
-        $this->getClient()->setURL($pUri);
-        $this->getClient()->setMethod($pMethod);
+        $this->getClient()->setURL($uri);
+        $this->getClient()->setMethod($method);
 
         return $this->run();
     }
@@ -929,7 +929,7 @@ class Server
         $params = $reflectionMethod->getParameters();
         
         if ($method == '_all_') {
-            //first parameter is $pMethod
+            //first parameter is $method
             array_shift($params);
         }
         
@@ -1004,19 +1004,19 @@ class Server
     /**
      * Fire a method.
      * 
-     * @param  string $pMethod  The method to fire.
-     * @param  object $pObject  The object to fire the method on.
-     * @param  array  $pArgs    The arguments to pass to the method.
+     * @param  string $method   The method to fire.
+     * @param  object $object   The object to fire the method on.
+     * @param  array  $args     The arguments to pass to the method.
      * @return mixed            The response.
      */
-    public function fireMethod($pMethod, $pController, $pArguments) {
+    public function fireMethod($method, $controller, $arguments) {
         $unescape = 0;
         
-        if (is_string($pMethod)) {
+        if (is_string($method)) {
             $ref = new \ReflectionClass($this->controller);
-            $refMethod = $ref->getMethod($pMethod);
+            $refMethod = $ref->getMethod($method);
         } else {
-            $refMethod = new \ReflectionFunction($pMethod);
+            $refMethod = new \ReflectionFunction($method);
         }
         $metadata = $this->getMethodMetaData($refMethod);
 
@@ -1026,19 +1026,19 @@ class Server
 
         $callable = false;
 
-        if ($pController && is_string($pMethod)) {
-            if (!method_exists($pController, $pMethod)) {
-                return $this->sendError('MethodNotFoundException', sprintf('Method %s in class %s not found.', $pMethod, get_class($pController)));
+        if ($controller && is_string($method)) {
+            if (!method_exists($controller, $method)) {
+                return $this->sendError('MethodNotFoundException', sprintf('Method %s in class %s not found.', $method, get_class($controller)));
             } else {
-                $callable = [$pController, $pMethod];
+                $callable = [$controller, $method];
             }
-        } elseif (is_callable($pMethod)) {
-            $callable = $pMethod;
+        } elseif (is_callable($method)) {
+            $callable = $method;
         }
 
         if ($callable) {
             try {
-                return $this->send(call_user_func_array($callable, $pArguments), $unescape);
+                return $this->send(call_user_func_array($callable, $arguments), $unescape);
             } catch (\Exception $e) {
                 return $this->sendException($e);
             }
@@ -1048,14 +1048,14 @@ class Server
     /**
      * Describe a route or the whole controller with all routes.
      * 
-     * @param  string  $pUri            The uri to describe.
-     * @param  boolean $pOnlyRoutes     Whether to only describe the routes.
-     * @return array                    The description.
+     * @param  string  $uri         The uri to describe.
+     * @param  boolean $onlyRoutes  Whether to only describe the routes.
+     * @return array                The description.
      */
-    public function describe($pUri = null, $pOnlyRoutes = false) {
+    public function describe($uri = null, $onlyRoutes = false) {
         $definition = [];
 
-        if (!$pOnlyRoutes) {
+        if (!$onlyRoutes) {
             $definition['parameters'] = [
                 '_method' => [
                     'description' => 'Can be used as HTTP METHOD if the client does not support HTTP methods.', 
@@ -1082,13 +1082,13 @@ class Server
         foreach ($this->routes as $routeUri => $routeMethods) {
 
             $matches = [];
-            if (!$pUri || ($pUri && preg_match('|^'.$routeUri.'$|', $pUri, $matches))) {
+            if (!$uri || ($uri && preg_match('|^' . $routeUri . '$|', $uri, $matches))) {
 
                 if ($matches) {
                     array_shift($matches);
                 }
                 $def = [];
-                $def['uri'] = $this->getTriggerUrl().'/'.$routeUri;
+                $def['uri'] = $this->getTriggerUrl() . '/' . $routeUri;
 
                 foreach ($routeMethods as $method => $phpMethod) {
 
@@ -1106,7 +1106,7 @@ class Server
             }
         }
 
-        if (!$pUri) {
+        if (!$uri) {
             foreach ($this->controllers as $controller) {
                 $definition['subController'][$controller->getTriggerUrl()] = $controller->describe(false, true);
             }
@@ -1118,13 +1118,13 @@ class Server
     /**
      * Fetches all meta data informations as params, return type etc.
      * 
-     * @param  \ReflectionMethod    $pMethod
-     * @param  array                $pRegMatches
+     * @param  \ReflectionMethod    $method
+     * @param  array                $regMatches
      * @return array                The meta data.
      */
-    public function getMethodMetaData(\ReflectionFunctionAbstract $pMethod, $pRegMatches = null) {
-        $file = $pMethod->getFileName();
-        $startLine = $pMethod->getStartLine();
+    public function getMethodMetaData(\ReflectionFunctionAbstract $method, $regMatches = null) {
+        $file = $method->getFileName();
+        $startLine = $method->getStartLine();
 
         $fh = fopen($file, 'r');
         if (!$fh)
@@ -1178,7 +1178,7 @@ class Server
 
         $phpDoc = $this->parsePhpDoc($phpDoc);
 
-        $refParams = $pMethod->getParameters();
+        $refParams = $method->getParameters();
         $params = [];
 
         $fillPhpDocParam = !isset($phpDoc['param']);
@@ -1209,7 +1209,7 @@ class Server
                     'type' => $phpDocParam['type']
                 ];
 
-                if ($pRegMatches && is_array($pRegMatches) && $pRegMatches[$c]) {
+                if ($regMatches && is_array($regMatches) && $regMatches[$c]) {
                     $parameter['fromRegex'] = '$'.($c+1);
                 }
 
@@ -1241,11 +1241,11 @@ class Server
     /**
      * Parse phpDoc string and returns an array of attributes.
      * 
-     * @param  string $pString The phpDoc string.
+     * @param  string $string  The phpDoc string.
      * @return array           The attribute array.
      */
-    public function parsePhpDoc($pString) {
-        preg_match('#^/\*\*(.*)\*/#s', trim($pString), $comment);
+    public function parsePhpDoc($string) {
+        preg_match('#^/\*\*(.*)\*/#s', trim($string), $comment);
         
         if (0 === count($comment))
             return [];
@@ -1308,37 +1308,37 @@ class Server
     /**
      * Set first char to lower case.
      * 
-     * @param  string $pName    The name.
-     * @return string           The name.
+     * @param  string $name The name.
+     * @return string       The name.
      */
-    public function argumentName($pName) {
-        if (ctype_lower(substr($pName, 0, 1)) && ctype_upper(substr($pName, 1, 1))) {
-            return strtolower(substr($pName, 1, 1)).substr($pName, 2);
+    public function argumentName($name) {
+        if (ctype_lower(substr($name, 0, 1)) && ctype_upper(substr($name, 1, 1))) {
+            return strtolower(substr($name, 1, 1)).substr($name, 2);
         }
-        return $pName;
+        return $name;
     }
 
     /**
      * Find and return the route for the URL.
      * 
-     * @param  string       $pUri       The URL.
-     * @param  string       $pMethod    limit to method.
-     * @return array|bool               The route or false if not found.
+     * @param  string       $uri    The URL.
+     * @param  string       $method Limit results to a specific request method.
+     * @return array|bool           The route or false if not found.
      */
-    public function findRoute($pUri, $pMethod = '_all_') {
-        if (isset($this->routes[$pUri][$pMethod]) && $method = $this->routes[$pUri][$pMethod]) {
-            return [$method, [], $pMethod, $pUri];
-        } elseif ($pMethod != '_all_' && isset($this->routes[$pUri]['_all_']) && $method = $this->routes[$pUri]['_all_']) {
-            return [$method, [], $pMethod, $pUri];
+    public function findRoute($uri, $method = '_all_') {
+        if (isset($this->routes[$uri][$method]) && $route = $this->routes[$uri][$method]) {
+            return [$route, [], $method, $uri];
+        } elseif ($method != '_all_' && isset($this->routes[$uri]['_all_']) && $route = $this->routes[$uri]['_all_']) {
+            return [$route, [], $method, $uri];
         } else {
             //maybe we have a regex uri
             foreach ($this->routes as $routeUri => $routeMethods) {
 
-                if (preg_match('|^'.$routeUri.'$|', $pUri, $matches)) {
+                if (preg_match('|^' . $routeUri . '$|', $uri, $matches)) {
                     $arguments = [];
-                    if (!isset($routeMethods[$pMethod])) {
+                    if (!isset($routeMethods[$method])) {
                         if (isset($routeMethods['_all_']))
-                            $pMethod = '_all_';
+                            $method = '_all_';
                         else
                             continue;
                     }
@@ -1348,7 +1348,7 @@ class Server
                         $arguments[] = $match;
                     }
 
-                    return [$routeMethods[$pMethod], $arguments, $pMethod, $routeUri];
+                    return [$routeMethods[$method], $arguments, $method, $routeUri];
                 }
 
             }
