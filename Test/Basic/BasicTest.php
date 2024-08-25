@@ -16,10 +16,12 @@ class BasicTest extends TestCase
             ->collectRoutes();
 
         $response = $restService->simulateCall('/test/test', 'get');
-        $this->assertEquals('{
-    "status": 200,
-    "data": "test"
-}', $response);
+        $this->assertEquals(<<<JSON
+        {
+            "status": 200,
+            "data": "test"
+        }
+        JSON, $response);
 
     }
 }

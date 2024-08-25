@@ -830,7 +830,7 @@ class Server
      */
     public function simulateCall($uri, $method = 'get') {
         if (($idx = strpos($uri, '?')) !== false) {
-            parse_str(substr($uri, $idx+1), $_GET);
+            parse_str(substr($uri, $idx + 1), $_GET);
             $uri = substr($uri, 0, $idx);
         }
         $this->getClient()->setURL($uri);
@@ -866,19 +866,18 @@ class Server
         //check if its in our area
         if ($requestedUrl !== null && strpos($requestedUrl, $this->triggerUrl) !== 0)
             return;
-
-        $endPos = $this->triggerUrl === '/'
+        
+        if ($requestedUrl != null) {
+            $endPos = $this->triggerUrl === '/'
                     ? 1
                     : strlen($this->triggerUrl) + 1;
-
-        if ($requestedUrl != null) {
             $uri = substr($requestedUrl, $endPos);
-        }
-        else {
+        } else {
             $uri = '';
         }
 
-        if (!$uri) $uri = '';
+        if (!$uri)
+            $uri = '';
 
         $arguments = [];
         $requiredMethod = $this->getClient()->getMethod();
@@ -916,8 +915,9 @@ class Server
         //open class and scan method
         if ($this->controller && is_string($callableMethod)) {
             if (!method_exists($this->controller, $callableMethod)) {
-                $this->sendBadRequest('MethodNotFoundException', "There is no method '$callableMethod' in ".
-                    get_class($this->controller).".");
+                $this->sendBadRequest('MethodNotFoundException', 
+                                    sprintf("There is no method '%s' in %s.", 
+                                        $callableMethod, get_class($this->controller)));
             }
             
             $ref = new \ReflectionClass($this->controller);
@@ -934,7 +934,7 @@ class Server
         }
         
         //remove regex arguments
-        for ($i=0; $i<count($regexArguments); $i++) {
+        for ($i = 0; $i < count($regexArguments); $i++) {
             array_shift($params);
         }
         
@@ -972,7 +972,8 @@ class Server
                 }
 
                 if (!$param->isOptional() && !isset($_GET[$name]) && !isset($_POST[$name]) && !isset($_PUT[$name])) {
-                    return $this->sendBadRequest('MissingRequiredArgumentException', sprintf("Argument '%s' is missing.", $name));
+                    return $this->sendBadRequest('MissingRequiredArgumentException', 
+                                                sprintf("Argument '%s' is missing.", $name));
                 }
                 
                 $arguments[] = $_GET[$name] ?? $_POST[$name] ?? $_PUT[$name] ?? $param->getDefaultValue();
@@ -1028,7 +1029,8 @@ class Server
 
         if ($controller && is_string($method)) {
             if (!method_exists($controller, $method)) {
-                return $this->sendError('MethodNotFoundException', sprintf('Method %s in class %s not found.', $method, get_class($controller)));
+                return $this->sendError('MethodNotFoundException', 
+                                        sprintf('Method %s in class %s not found.', $method, get_class($controller)));
             } else {
                 $callable = [$controller, $method];
             }
@@ -1145,7 +1147,7 @@ class Server
         while ($line = array_pop($lines)) {
 
             if ($blockStarted) {
-                $phpDoc = $line.$phpDoc;
+                $phpDoc = $line . $phpDoc;
 
                 //if start comment block: /*
                 if (preg_match('/\s*\/\*/', $line)) {
@@ -1167,7 +1169,7 @@ class Server
 
             //if end comment block: */
             if (preg_match('/\*\//', $line)) {
-                $phpDoc = $line.$phpDoc;
+                $phpDoc = $line . $phpDoc;
                 $blockStarted = true;
                 //one line php doc?
                 if (preg_match('/\s*\/\*/', $line)) {
@@ -1210,7 +1212,7 @@ class Server
                 ];
 
                 if ($regMatches && is_array($regMatches) && $regMatches[$c]) {
-                    $parameter['fromRegex'] = '$'.($c+1);
+                    $parameter['fromRegex'] = '$' . ($c + 1);
                 }
 
                 $parameter['required'] = !$param->isOptional();
@@ -1275,7 +1277,7 @@ class Server
                 $line = ltrim(substr($line, strlen($currentTag) + 1));
             }
 
-            $currentData = trim($currentData.' '.$line);
+            $currentData = trim($currentData . ' ' . $line);
 
         }
         if ($currentTag)
@@ -1313,7 +1315,7 @@ class Server
      */
     public function argumentName($name) {
         if (ctype_lower(substr($name, 0, 1)) && ctype_upper(substr($name, 1, 1))) {
-            return strtolower(substr($name, 1, 1)).substr($name, 2);
+            return strtolower(substr($name, 1, 1)) . substr($name, 2);
         }
         return $name;
     }

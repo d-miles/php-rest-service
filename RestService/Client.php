@@ -318,7 +318,7 @@ class Client {
             } elseif (($char == '}' || $char == ']') && $outOfQuotes) {
                 $result .= $newLine;
                 $pos--;
-                for ($j=0; $j<$pos; $j++) {
+                for ($j = 0; $j < $pos; $j++) {
                     $result .= $indentStr;
                 }
             } elseif ($char == ':' && $outOfQuotes) {
@@ -333,7 +333,7 @@ class Client {
             if (($char == ',' || $char == '{' || $char == '[') && $outOfQuotes) {
                 $result .= $newLine;
                 if ($char == '{' || $char == '[') {
-                    $pos ++;
+                    $pos++;
                 }
 
                 for ($j = 0; $j < $pos; $j++) {
@@ -366,11 +366,11 @@ class Client {
             $content = '';
 
             foreach ($message as $key => $data) {
-                $key = is_numeric($key) ? $parentTagName.'-item' : $key;
+                $key = is_numeric($key) ? $parentTagName . '-item' : $key;
                 $content .= str_repeat('  ', $depth)
-                    .'<'.htmlspecialchars($key).'>'.
-                    $this->asXml($data, $key, $depth+1, false)
-                    .'</'.htmlspecialchars($key).">\n";
+                    . '<' . htmlspecialchars($key) . '>' . 
+                    $this->asXML($data, $key, $depth + 1, false)
+                    . '</' . htmlspecialchars($key) . ">\n";
             }
 
             $xml = $content;
@@ -398,8 +398,8 @@ class Client {
 
         $text = '';
         foreach ($message as $key => $data) {
-            $key = is_numeric($key) ? '' : $key.': ';
-            $text .= $key.$data."\n";
+            $key = is_numeric($key) ? '' : $key . ': ';
+            $text .= $key . $data . "\n";
         }
         $this->setContentLength($text);
 

@@ -160,12 +160,12 @@ class OpenApiController {
             
             $matches = [];
             
-            if (!$uri || ($uri && preg_match('|^'.$routeUri.'$|', $uri, $matches))) {
+            if (!$uri || ($uri && preg_match('|^' . $routeUri . '$|', $uri, $matches))) {
                 
                 if ($matches) {
                     array_shift($matches);
                 }
-                $path = $url . '/'.$routeUri;
+                $path = $url . '/' . $routeUri;
                 $originalPath = $path;
                 $finalPath = null;
                 $def = [];
