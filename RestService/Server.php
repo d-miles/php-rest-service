@@ -763,7 +763,7 @@ class Server
      * @param $data The data to send.
      * @return void
      */
-    public function send($data, $unescape = 0) {
+    public function send($data, $unescape = false) {
         return $this->getClient()->sendResponse(['data' => $data], 200, $unescape);
     }
 
@@ -981,15 +981,17 @@ class Server
         }
 
         if ($this->checkAccessFn) {
-            $args[] = $this->getClient()->getURL();
-            $args[] = $routeUri;
-            $args[] = $method;
-            $args[] = $arguments;
+            $accessArgs = [
+                $this->getClient()->getURL(),
+                $routeUri,
+                $method,
+                $arguments
+            ];
             try {
                 if ($this->checkAccessFn instanceof \Closure) {
-                    $this->checkAccessFn->call($this->controller, ...$args);
+                    $this->checkAccessFn->call($this->controller, ...$accessArgs);
                 } else {
-                    call_user_func_array($this->checkAccessFn, $args);
+                    call_user_func_array($this->checkAccessFn, $accessArgs);
                 }
             } catch (\Exception $e) {
                 $this->sendException($e);
@@ -1050,7 +1052,7 @@ class Server
     /**
      * Describe a route or the whole controller with all routes.
      * 
-     * @param  string  $uri         The uri to describe.
+     * @param  ?string $uri         The uri to describe.
      * @param  boolean $onlyRoutes  Whether to only describe the routes.
      * @return array                The description.
      */
@@ -1085,13 +1087,13 @@ class Server
 
             $matches = [];
             if (!$uri || ($uri && preg_match('|^' . $routeUri . '$|', $uri, $matches))) {
-
                 if ($matches) {
                     array_shift($matches);
                 }
-                $def = [];
-                $def['uri'] = $this->getTriggerUrl() . '/' . $routeUri;
-
+                
+                $def = [
+                    'uri' => $this->getTriggerUrl() . '/' . $routeUri
+                ];
                 foreach ($routeMethods as $method => $phpMethod) {
 
                     if (is_string($phpMethod)) {
@@ -1102,7 +1104,6 @@ class Server
                     }
 
                     $def['methods'][strtoupper($method)] = $this->getMethodMetaData($refMethod, $matches);
-
                 }
                 $definition['controller']['routes'][$routeUri] = $def;
             }
@@ -1110,7 +1111,7 @@ class Server
 
         if (!$uri) {
             foreach ($this->controllers as $controller) {
-                $definition['subController'][$controller->getTriggerUrl()] = $controller->describe(false, true);
+                $definition['subController'][$controller->getTriggerUrl()] = $controller->describe(null, $onlyRoutes);
             }
         }
 

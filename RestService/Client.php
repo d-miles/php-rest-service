@@ -164,47 +164,55 @@ class Client {
     }
 
     /**
-     * Sends the actual response.
+     * Sends the response.
      * 
      * @param array $message The data to return.
      * @param string $httpCode The HTTP code to return.
+     * @param bool $unescape Whether to unescape the JSON. TODO: Move this elsewhere!
      * @return void
      */
-    public function sendResponse($message, $httpCode = '200', $unescape = 0)
-    {
-        $suppressStatusCode = isset($_GET['_suppress_status_code']) ? $_GET['_suppress_status_code'] : false;
-        if ($this->controller->getHttpStatusCodes() &&
-            !$suppressStatusCode &&
-            php_sapi_name() !== 'cli') {
-
-            $status = self::$statusCodes[intval($httpCode)];
-            header('HTTP/1.0 ' . ($status ? $httpCode . ' ' . $status : $httpCode), true, $httpCode);
-        } elseif (php_sapi_name() !== 'cli') {
-            header('HTTP/1.0 200 OK');
-        }
-
+    public function sendResponse($message, $httpCode = '200', $unescape = false) {
+        $this->setStatusCode($httpCode);
+        
         $message = array_reverse($message, true);
         $message['status'] = intval($httpCode);
         $message = array_reverse($message, true);
-
-        $method = $this->getOutputFormatMethod($this->getOutputFormat());
-        if ($method == 'customFormat' && $this->customFormat == null) {
-            echo $this->asJSON($message, $unescape);
-        } else if ($method == 'customFormat' && $this->customFormat != null) {
-            $args = [$message];
-            $result = call_user_func_array($this->getCustomFormat(), $args);
-            $this->setContentLength($result);
-
-            echo $result;
-        } else {
-            if ($method == "asJSON" || $method == "json") {
-                echo $this->asJSON($message, $unescape);
-            }
-            else {
-                echo $this->$method($message);
-            }
-        }
+        
+        $response = $this->getFormattedResponse($message, $unescape);
+        
+        // Set the Content-Length header if the format method didn't already set it
+        if (count(array_filter(headers_list(), fn($header) => str_starts_with($header, 'Content-Length'))) === 0)
+            $this->setContentLength($response);
+        
+        echo $response;
         exit;
+    }
+    
+    /**
+     * Gets the formatted response.
+     * 
+     * @param array $message The data to format.
+     * @param bool $unescape Whether to unescape the JSON. TODO: Move this elsewhere!
+     * @return string
+     */
+    protected function getFormattedResponse($message, $unescape = false) {
+        // If the custom format was not actually configured, reset it.
+        if ($this->getOutputFormat() === 'custom' && $this->customFormat == null)
+            $this->setupFormats();
+        
+        $formatMethod = $this->getOutputFormatMethod($this->getOutputFormat());
+        $args = [$message];
+        if ($formatMethod === 'customFormat') {
+            $result = call_user_func_array($this->getCustomFormat(), $args);
+        } else {
+            $method = $this->$formatMethod(...);
+            if ($formatMethod === 'asJSON')
+                $args[] = $unescape;
+            
+            $result = $method->call($this, ...$args);
+        }
+        
+        return $result;
     }
 
     /**
@@ -273,14 +281,59 @@ class Client {
     }
     
     /**
-     * Set header "Content-Length" from data.
+     * Set the status code.
      * 
-     * @param mixed $message The data to set the header from.
+     * @param int $httpCode The HTTP code to set.
      * @return void
      */
-    public function setContentLength($message) {
-        if (php_sapi_name() !== 'cli' )
-            header('Content-Length: ' . strlen($message));
+    protected function setStatusCode($httpCode) {
+        if (php_sapi_name() === 'cli')
+            return;
+        
+        $suppressStatusCode = isset($_GET['_suppress_status_code']) ? $_GET['_suppress_status_code'] : false;
+        if (!$suppressStatusCode && $this->controller->getHttpStatusCodes()) {
+            $status = static::$statusCodes[intval($httpCode)];
+            header('HTTP/1.0 ' . ($status ? $httpCode . ' ' . $status : $httpCode), true, $httpCode);
+        } else {
+            header('HTTP/1.0 200 OK');
+        }
+    }
+    
+    /**
+     * Set a header.
+     * 
+     * @param string $headerName The name of the header.
+     * @param string $value The value of the header.
+     * @return void
+     */
+    protected function setHeader($headerName, $value) {
+        if (php_sapi_name() === 'cli' || headers_sent())
+            return;
+        
+        header($headerName . ': ' . $value);
+    }
+    
+    /**
+     * Set "Content-Type" header from data.
+     * 
+     * @param string $message The content-type header to set.
+     * @param string $charset The charset of the content-type.
+     * @return void
+     */
+    protected function setContentType($contentType, $charset = null) {
+        if ($charset !== null)
+            $contentType .= "; charset={$charset}";
+        $this->setHeader('Content-Type', $contentType);
+    }
+    
+    /**
+     * Set "Content-Length" header from data.
+     * 
+     * @param string $message The data to set the header from.
+     * @return void
+     */
+    protected function setContentLength($message) {
+        $this->setHeader('Content-Length', strlen($message));
     }
     
     /**
@@ -289,9 +342,8 @@ class Client {
      * @param mixed $message The data to convert.
      * @return string JSON version of the original data.
      */
-    public function asJSON($message, $unescape = 0) {
-        if (php_sapi_name() !== 'cli' )
-            header('Content-Type: application/json; charset=utf-8');
+    public function asJSON($message, $unescape = false) {
+        $this->setContentType('application/json', 'utf-8');
         
         $json = !is_string($message)
                     ? json_encode($message, $unescape ? JSON_UNESCAPED_SLASHES : 0)
@@ -303,7 +355,7 @@ class Client {
         $newLine     = "\n";
         $inEscapeMode = false; //if the last char is a valid \ char.
         $outOfQuotes = true;
-
+        
         for ($i = 0, $strLen = strlen($json); $i <= $strLen; $i++) {
 
             // Grab the next character in the string.
@@ -346,9 +398,7 @@ class Client {
             else
                 $inEscapeMode = false;
         }
-
-        $this->setContentLength($result);
-
+        
         return $result;
     }
 
@@ -362,9 +412,11 @@ class Client {
      * @return string XML version of the original data.
      */
     public function asXML($message, $parentTagName = '', $depth = 1, $header = true) {
+        $this->setContentType('application/xml', 'utf-8');
+        
         if (is_array($message)) {
             $content = '';
-
+            
             foreach ($message as $key => $data) {
                 $key = is_numeric($key) ? $parentTagName . '-item' : $key;
                 $content .= str_repeat('  ', $depth)
@@ -372,17 +424,16 @@ class Client {
                     $this->asXML($data, $key, $depth + 1, false)
                     . '</' . htmlspecialchars($key) . ">\n";
             }
-
+            
             $xml = $content;
         } else {
             $xml = htmlspecialchars($message);
         }
-
+        
         if ($header) {
             $xml = "<?xml version=\"1.0\"?>\n<response>\n$xml</response>\n";
-            $this->setContentLength($xml);
         }
-
+        
         return $xml;
     }
 
@@ -393,16 +444,14 @@ class Client {
      * @return string JSON version of the original data.
      */
     public function asText($message) {
-        if (php_sapi_name() !== 'cli' )
-            header('Content-Type: text/plain; charset=utf-8');
-
+        $this->setContentType('text/plain', 'utf-8');
+        
         $text = '';
         foreach ($message as $key => $data) {
             $key = is_numeric($key) ? '' : $key . ': ';
             $text .= $key . $data . "\n";
         }
-        $this->setContentLength($text);
-
+        
         return $text;
     }
 
@@ -447,7 +496,7 @@ class Client {
     public function setupFormats() {
         //through HTTP_ACCEPT
         if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], '*/*') === false) {
-            foreach ($this->outputFormats as $formatCode => $formatMethod) {
+            foreach (array_keys($this->outputFormats) as $formatCode) {
                 if (strpos($_SERVER['HTTP_ACCEPT'], $formatCode) !== false) {
                     $this->outputFormat = $formatCode;
                     break;
@@ -466,7 +515,7 @@ class Client {
             if (isset($this->outputFormats[$matches[1]])) {
                 $this->outputFormat = $matches[1];
                 $url = $this->getURL();
-                $this->setURL(substr($url, 0, (strlen($this->outputFormat)*-1)-1));
+                $this->setURL(substr($url, 0, (strlen($this->outputFormat) * -1) - 1));
             }
         }
 
