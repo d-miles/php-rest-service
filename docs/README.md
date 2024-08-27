@@ -269,6 +269,9 @@ data: Hello world
 
 Note that a subcontroller will automatically inherit its parent's `Client` instance upon instantiation when using the [`addSubController()`](phpdoc/#serveraddsubcontroller) method. This means that if you want to use a different format for a subcontroller, you'll first need to create a new `Client` instance:
 
+<!-- panels:start -->
+<!-- div:left-panel -->
+
 ```php
 Server::create('/')
     ->addGetRoute('', fn () => "Hello world")
@@ -282,11 +285,11 @@ Server::create('/')
     ->run();
 ```
 
-<!-- panels:start -->
-<!-- div:left-panel -->
+<!-- div:right-panel -->
 
-##### Default Response
-`+ GET  /`
+<!-- tabs:start -->
+
+##### **GET /**
 
 ```json
 {
@@ -295,15 +298,14 @@ Server::create('/')
 }
 ```
 
-<!-- div:right-panel -->
+##### **GET /plain**
 
-##### Plain-text Response
-`+ GET  /plain`
-
-```
+```text
 status: 200
 data: Goodbye world
 ```
+
+<!-- tabs:end -->
 
 <!-- panels:end -->
 
