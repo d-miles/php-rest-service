@@ -259,11 +259,17 @@ Server::create('/')
 
 <!-- div:right-panel -->
 
-`+ GET  /plain`
+
+<!-- tabs:start -->
+
+##### **<code style="background: transparent">GET /</code>**
+
 ```text
 status: 200
 data: Hello world
 ```
+
+<!-- tabs:end -->
 
 <!-- panels:end -->
 
@@ -289,7 +295,7 @@ Server::create('/')
 
 <!-- tabs:start -->
 
-##### **GET /**
+##### **<code style="background: transparent">GET /</code>**
 
 ```json
 {
@@ -298,7 +304,7 @@ Server::create('/')
 }
 ```
 
-##### **GET /plain**
+##### **<code style="background: transparent">GET /plain</code>**
 
 ```text
 status: 200
@@ -311,7 +317,7 @@ data: Goodbye world
 
 #### Custom Response Formatters
 
-You can also define your own response formatters using the [`setCustomFormat()`](phpdoc/#clientsetcustomformat) method along with the [`setFormat()`](phpdoc/#clientsetformat) method. The response formatting function will be called with a single argument, [`$message` php], which is an associative array representing the response data to be serialized:
+You can also define your own response formatters using the [<code>Client::setCustomFormat()</code>](phpdoc/#clientsetcustomformat) and [<code>Client::setFormat()</code>](phpdoc/#clientsetformat) method. The response formatting function will be called with a single argument, [`$message` php], which is an associative array representing the response data to be serialized:
 
 ```php
 [
