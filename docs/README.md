@@ -74,10 +74,12 @@ Each of these methods has the following signature:
 function (string $path, callable $callbackFn)
 ```
 
-Alternatively, you could also use [`addRoute()`](phpdoc/#serveraddroute) to add a route for a specific HTTP method, or omit the [`$method` php] argument altogether to add a route for _all_ HTTP methods:
+Alternatively, you could also use [`addRoute()`](phpdoc/#serveraddroute) to add a route for a specific HTTP method:
 ```php
 function addRoute(string $path, callable $callbackFn, string $method = '_all_')
 ```
+
+?> Omit the `$method` argument altogether to add a route for _all_ HTTP methods
 
 ### Automatic Endpoint Generation
 
@@ -85,7 +87,7 @@ With automatic endpoint generation, you can supply a PHP class that contains end
 
 Function names will be converted from camel-case to dash-case. eg. `getFooBar()` will be converted to `/foo-bar`.
 
-You can also bind a function to a route other than the function name. Simply use the `@url` PHPDoc annotation to define the route. For example, `@url /foo-bar` will bind the function to the same route as `getFooBar()` would.
+You can also bind a function to a route other than the function name. Simply use the `@url` PHPDoc annotation to define the route. For example, `@url foo-bar` will bind the function to the same route as `getFooBar()` would.
 
 <!-- div:right-panel -->
 
@@ -98,15 +100,15 @@ You can also bind a function to a route other than the function name. Simply use
 use RestService\Server;
 
 Server::create('/')
-    ->addGetRoute('test', function() {
-        return 'Yay!';
+    ->addGetRoute('foo', function() {
+        return 'bar';
     })
-    ->addPostRoute('foo', function($field1) {
-        // $field1 is the equivalent of $_POST['field1']
-        return 'Hello ' . $field1;
+    ->addGetRoute('foo/bar', function () {
+        return 'baz';
     })
-    ->addGetRoute('use/this/name', function() {
-        return 'Hi there';
+    ->addPostRoute('greeting', function($name) {
+        // $name is the equivalent of $_POST['name']
+        return 'Hello ' . $name;
     })
     ->run();
 ```
@@ -117,36 +119,36 @@ namespace MyRestApi;
 
 use RestService\Server;
 
-class Admin {
-    public function getTest(){
-        return 'Yay!';
-    }
-    
-    public function postFoo($field1){
-      // $field1 is the equivalent of $_POST['field1']
-      return 'Hello ' . $field1;
+class Demo {
+    public function getFoo(){
+        return 'bar';
     }
     
     /*
-     * @url /use/this/name
+     * @url foo/bar
      */
-    public function getNotThisName($field1){
-        return 'Hi there';
+    public function getBaz(){
+        return 'baz';
+    }
+    
+    public function postGreeting($name){
+        // $name is the equivalent of $_POST['name']
+        return 'Hello ' . $name;
     }
 }
 
-Server::create('/', Admin::class)
+Server::create('/', Demo::class)
     ->collectRoutes()
     ->run();
 ```
 
 <!-- tabs:end -->
 
-Both examples above generate the following endpoints:
+Both examples above are equivalent and will generate the following endpoints:
 ```
-+ GET  /test
-+ POST /foo
-+ GET  /use/this/name
++ GET  /foo
++ GET  /foo/bar
++ POST /greeting
 ```
 
 <!-- panels:end -->
@@ -197,7 +199,7 @@ public function getFoo() {
 
 To capture parameters from the URL for use as function arguments, simply include one or more capturing groups in the `$path`/`@url` value.
 
-For example, in order to match the `:id` and `:action` parameters in the following URL, `/foo/:id/something/:action`, where `:id` is an integer and `:action` is a string, you can use the following:
+For example, in order to match the `:id` and `:action` parameters in the following URL, <code>/foo/<mark>:id</mark>/bar/<mark>:action</mark></code>, where `:id` is an integer and `:action` is a string, you can use the following:
 
 <!-- div:right-panel -->
 
@@ -205,16 +207,16 @@ For example, in order to match the `:id` and `:action` parameters in the followi
 
 ###### **Manual Endpoints**
 ```php
-->addPostRoute('foo/(\d+)/something/(\w+)', 'postFoo')
+->addPostRoute('foo/(\d+)/bar/(\w+)', 'postFoo')
 ```
 
 ###### **Automatic Endpoints**
 ```php
 /**
- * @url foo/(\d+)/something/(\w+)
+ * @url foo/(\d+)/bar/(\w+)
  */
 public function postFoo($arg1, $arg2){
-  return 'Yay!';
+    return 'bar';
 }
 ```
 
@@ -230,10 +232,10 @@ For example, in order to add a POST parameter `content` to the endpoint, you can
 
 ```php
 /**
- * @url foo/(\d+)/something/(\w+)
+ * @url foo/(\d+)/bar/(\w+)
  */
 public function postFoo($arg1, $arg2, $content){
-  return 'Yay!';
+    return 'bar' . $content;
 }
 ```
 
@@ -241,24 +243,69 @@ public function postFoo($arg1, $arg2, $content){
 
 #### Built-in Response Formatters
 
-You can use the [`setFormat()`](phpdoc/#clientsetformat) method of the API client to specify the response format.
-Available formats are `json`, `xml`, and `text`.
+You can use the [`Server::getClient()`](phpdoc/#servergetclient) and [`Client::setFormat()`](phpdoc/#clientsetformat) methods to specify the response format. The available formats are `json`, `xml`, and `text` by default.
 
-In order to set the format, you must first access the current client using the [`getClient()`](phpdoc/#servergetclient) method.
-You may only set the format on the top level controller, as each sub controller shares the same client with the parent.
-
-If you would like to have different formats for different endpoints, you must create a new server using the [`create()`](phpdoc/#servercreate) method, rather than creating a new controller.
+<!-- panels:start -->
+<!-- div:left-panel -->
 
 ```php
-Server::create('test')
+Server::create('/')
     ->getClient()
         ->setFormat('text')
-    ->getController()
-    ->addGetRoute('', function($test) {
-        return "Hello {$test}";
-    })
+        ->getController()
+    ->addGetRoute('', fn () => "Hello world")
     ->run();
 ```
+
+<!-- div:right-panel -->
+
+`+ GET  /plain`
+```text
+status: 200
+data: Hello world
+```
+
+<!-- panels:end -->
+
+Note that a subcontroller will automatically inherit its parent's `Client` instance upon instantiation when using the [`addSubController()`](phpdoc/#serveraddsubcontroller) method. This means that if you want to use a different format for a subcontroller, you'll first need to create a new `Client` instance:
+
+```php
+Server::create('/')
+    ->addGetRoute('', fn () => "Hello world")
+    ->addSubController('/plain')
+        ->setClient(Client::class) // Class name or instance can be passed
+        ->getClient()
+            ->setFormat('text')
+            ->getController()
+        ->addGetRoute('', fn () => "Goodbye world")
+        ->done()
+    ->run();
+```
+
+<!-- panels:start -->
+<!-- div:left-panel -->
+
+##### Default Response
+`+ GET  /`
+
+```json
+{
+    "status": 200,
+    "data": "Hello world"
+}
+```
+
+<!-- div:right-panel -->
+
+##### Plain-text Response
+`+ GET  /plain`
+
+```
+status: 200
+data: Goodbye world
+```
+
+<!-- panels:end -->
 
 #### Custom Response Formatters
 
@@ -267,26 +314,26 @@ You can also define your own response formatters using the [`setCustomFormat()`]
 ```php
 [
     'status' => 'success',
-    'data' => 'Hello World!'
+    'data' => 'bar'
 ]
 ```
 
-The formatter function should set the response header and return a string.
+The formatter function should set the appropriate Content-Type header using [`setContentType()`](phpdoc/#clientsetcontenttype), and should always return a string.
 
-The following example shows an adapted implementation of the plain text formatter:
+The following example shows an adapted implementation of the plain-text formatter:
 
 ```php
-Server::create('test')
+Server::create('/')
     ->getClient()
         ->setCustomFormat(function($message) {
-            if (php_sapi_name() !== 'cli' )
-                header('Content-Type: text/plain; charset=utf-8');
-
+            $this->setContentType('text/plain', 'utf-8');
+            
             $text = '';
             foreach ($message as $key => $data) {
                 $key = is_numeric($key) ? '' : "{$key}: ";
                 $text .= "{$key}{$data}\n";
             }
+            
             return $text;
         })
         ->setFormat('custom')
@@ -310,7 +357,7 @@ The following example will generate an OpenAPI specification in JSON format, acc
 
 Request and response types and their descriptions will be pulled from the PHPDoc comments of your endpoint functions. If no comment annotations are detected, the request and response types will default to `AnyValue`.
 
-?> **Note:** If you have already defined an endpoint named `/openapi.json`, it will take precedent over the internally-generated route.
+?> **NOTE** If you have already defined an endpoint named `/openapi.json`, it will take precedence over the internally-generated route.
 
 <!-- div:right-panel -->
 
@@ -343,8 +390,8 @@ If your route contains regular expressions with capturing groups, an attempt wil
 
 ```php
 /**
- * @url /foo/\d+/(\w+)
- * @openapi-url /foo/{var1}/{var2}
+ * @url foo/\d+/(\w+)
+ * @openapi-url foo/{var1}/{var2}
  */
 ```
 
