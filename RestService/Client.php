@@ -115,9 +115,7 @@ class Client {
     public function __construct($serverController)
     {
         $this->controller = $serverController;
-        if (isset($_SERVER['PATH_INFO']))
-            $this->setURL($_SERVER['PATH_INFO']);
-
+        $this->setURL($_SERVER['PATH_INFO'] ?? '/');
         $this->setupFormats();
     }
 

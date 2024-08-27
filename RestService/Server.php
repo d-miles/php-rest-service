@@ -865,7 +865,7 @@ class Server
         
         //check if its in our area
         if ($requestedUrl !== null && strpos($requestedUrl, $this->triggerUrl) !== 0)
-            return;
+            return false;
         
         if ($requestedUrl != null) {
             $endPos = $this->triggerUrl === '/'
@@ -875,16 +875,16 @@ class Server
         } else {
             $uri = '';
         }
-
+        
         if (!$uri)
             $uri = '';
-
+        
         $arguments = [];
         $requiredMethod = $this->getClient()->getMethod();
-
+        
         //does the requested uri exist?
         list($callableMethod, $regexArguments, $method, $routeUri) = $this->findRoute($uri, $requiredMethod);
-
+        
         // If request for options, send route description
         if ((!$callableMethod || $method != 'options') && $requiredMethod == 'options') {
             $description = $this->describe($uri);
@@ -904,14 +904,14 @@ class Server
                 return false;
             }
         }
-
+        
         if ($method == '_all_')
             $arguments[] = $method;
-
+        
         if (is_array($regexArguments)) {
             $arguments = array_merge($arguments, $regexArguments);
         }
-
+        
         //open class and scan method
         if ($this->controller && is_string($callableMethod)) {
             if (!method_exists($this->controller, $callableMethod)) {
@@ -979,7 +979,7 @@ class Server
                 $arguments[] = $_GET[$name] ?? $_POST[$name] ?? $_PUT[$name] ?? $param->getDefaultValue();
             }
         }
-
+        
         if ($this->checkAccessFn) {
             $accessArgs = [
                 $this->getClient()->getURL(),
@@ -997,10 +997,10 @@ class Server
                 $this->sendException($e);
             }
         }
-
+        
         //fire method
         $object = $this->controller;
-
+        
         return $this->fireMethod($callableMethod, $object, $arguments);
     }
 
